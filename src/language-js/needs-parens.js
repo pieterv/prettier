@@ -922,6 +922,7 @@ function needsParens(path, options) {
 const isStatement = createTypeCheckFunction([
   "BlockStatement",
   "BreakStatement",
+  "ComponentDeclaration",
   "ClassBody",
   "ClassDeclaration",
   "ClassMethod",
@@ -930,6 +931,7 @@ const isStatement = createTypeCheckFunction([
   "ClassPrivateProperty",
   "ContinueStatement",
   "DebuggerStatement",
+  "DeclareComponent",
   "DeclareClass",
   "DeclareExportAllDeclaration",
   "DeclareExportDeclaration",

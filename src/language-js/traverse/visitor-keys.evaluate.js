@@ -80,15 +80,4 @@ const visitorKeys = Object.fromEntries(
   ]),
 );
 
-// Unsupported
-for (const type of [
-  "ComponentDeclaration",
-  "ComponentParameter",
-  "ComponentTypeAnnotation",
-  "ComponentTypeParameter",
-  "DeclareComponent",
-]) {
-  delete visitorKeys[type];
-}
-
 export default visitorKeys;

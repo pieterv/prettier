@@ -46,6 +46,11 @@ import {
 } from "./misc.js";
 import { printTernary } from "./ternary.js";
 import { printFlowMappedTypeProperty } from "./mapped-type.js";
+import {
+  printComponent,
+  printComponentParameter,
+  printComponentTypeParameter,
+} from "./component.js";
 
 function printFlow(path, options, print) {
   const { node } = path;
@@ -58,6 +63,14 @@ function printFlow(path, options, print) {
   const semi = options.semi ? ";" : "";
 
   switch (node.type) {
+    case "ComponentDeclaration":
+    case "DeclareComponent":
+    case "ComponentTypeAnnotation":
+      return printComponent(path, options, print);
+    case "ComponentParameter":
+      return printComponentParameter(path, options, print);
+    case "ComponentTypeParameter":
+      return printComponentTypeParameter(path, options, print);
     case "DeclareClass":
       return printClass(path, options, print);
     case "DeclareFunction":

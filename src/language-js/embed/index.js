@@ -34,8 +34,8 @@ function embed(path) {
       return "``";
     }
 
-    return async (...args) => {
-      const doc = await embedder(...args);
+    return (...args) => {
+      const doc = embedder(...args);
       return doc && label({ embed: true, ...doc.label }, doc);
     };
   }

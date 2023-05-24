@@ -5,7 +5,7 @@ import {
 } from "../print/template-literal.js";
 import { hasLanguageComment } from "./utils.js";
 
-async function printEmbedGraphQL(textToDoc, print, path /*, options*/) {
+function printEmbedGraphQL(textToDoc, print, path /*, options*/) {
   const { node } = path;
 
   const numQuasis = node.quasis.length;
@@ -44,7 +44,7 @@ async function printEmbedGraphQL(textToDoc, print, path /*, options*/) {
     if (commentsAndWhitespaceOnly) {
       doc = printGraphqlComments(lines);
     } else {
-      doc = await textToDoc(text, { parser: "graphql" });
+      doc = textToDoc(text, { parser: "graphql" });
     }
 
     if (doc) {

@@ -37,7 +37,7 @@ function shouldHugJsExpression(ast, options) {
  * @param {(ast: any, options: any) => boolean} [shouldHugJsExpression]
  * @returns {Promise<Doc>}
  */
-async function formatAttributeValue(
+function formatAttributeValue(
   code,
   textToDoc,
   options,
@@ -57,7 +57,7 @@ async function formatAttributeValue(
     };
   }
 
-  const doc = await textToDoc(code, options, textToDoc);
+  const doc = textToDoc(code, options, textToDoc);
 
   return shouldHug ? group(doc) : printExpand(doc);
 }

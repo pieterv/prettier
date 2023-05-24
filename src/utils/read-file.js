@@ -1,12 +1,12 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 
 /**
  * @param {string} filename
  * @returns {Promise<undefined | string>}
  */
-async function readFile(filename) {
+function readFile(filename) {
   try {
-    return await fs.readFile(filename, "utf8");
+    return fs.readFileSync(filename, "utf8");
   } catch (/** @type {any} */ error) {
     if (error.code === "ENOENT") {
       return;

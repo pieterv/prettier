@@ -1,9 +1,9 @@
 import { hardline, markAsRoot } from "../../document/builders.js";
 
-async function print(node, textToDoc) {
+function print(node, textToDoc) {
   if (node.lang === "yaml") {
     const value = node.value.trim();
-    const doc = value ? await textToDoc(value, { parser: "yaml" }) : "";
+    const doc = value ? textToDoc(value, { parser: "yaml" }) : "";
     return markAsRoot([
       node.startDelimiter,
       hardline,

@@ -16,13 +16,13 @@ import { formatAttributeValue } from "./utils.js";
  * @param {*} options
  * @returns {Promise<Doc>}
  */
-async function printVueVForDirective(textToDoc, print, path, options) {
+function printVueVForDirective(textToDoc, print, path, options) {
   const value = getUnescapedAttributeValue(path.node);
   const { left, operator, right } = parseVueVForDirective(value);
   const parseWithTs = isVueSfcWithTypescriptScript(path, options);
   return [
     group(
-      await formatAttributeValue(`function _(${left}) {}`, textToDoc, {
+      formatAttributeValue(`function _(${left}) {}`, textToDoc, {
         parser: parseWithTs ? "babel-ts" : "babel",
         __isVueForBindingLeft: true,
       }),
@@ -30,7 +30,7 @@ async function printVueVForDirective(textToDoc, print, path, options) {
     " ",
     operator,
     " ",
-    await formatAttributeValue(right, textToDoc, {
+    formatAttributeValue(right, textToDoc, {
       parser: parseWithTs ? "__ts_expression" : "__js_expression",
     }),
   ];

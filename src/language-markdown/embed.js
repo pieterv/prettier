@@ -11,7 +11,7 @@ function embed(path, options) {
   if (node.type === "code" && node.lang !== null) {
     const parser = inferParser(options, { language: node.lang });
     if (parser) {
-      return async (textToDoc) => {
+      return (textToDoc) => {
         const styleUnit = options.__inJsTemplate ? "~" : "`";
         const style = styleUnit.repeat(
           Math.max(3, getMaxContinuousCount(node.value, styleUnit) + 1),
@@ -28,7 +28,7 @@ function embed(path, options) {
           newOptions.filepath = "dummy.tsx";
         }
 
-        const doc = await textToDoc(
+        const doc = textToDoc(
           getFencedCodeBlockValue(node, options.originalText),
           newOptions,
         );

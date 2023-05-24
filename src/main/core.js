@@ -22,18 +22,18 @@ const BOM = "\uFEFF";
 
 const CURSOR = Symbol("cursor");
 
-async function coreFormat(originalText, opts, addAlignmentSize = 0) {
+function coreFormat(originalText, opts, addAlignmentSize = 0) {
   if (!originalText || originalText.trim().length === 0) {
     return { formatted: "", cursorOffset: -1, comments: [] };
   }
 
-  const { ast, text } = await parseText(originalText, opts);
+  const { ast, text } = parseText(originalText, opts);
 
   if (opts.cursorOffset >= 0) {
     opts.cursorNode = getCursorNode(ast, opts);
   }
 
-  let doc = await printAstToDoc(ast, opts, addAlignmentSize);
+  let doc = printAstToDoc(ast, opts, addAlignmentSize);
 
   if (addAlignmentSize > 0) {
     // Add a hardline to make the indents take effect, it will be removed later
@@ -130,8 +130,8 @@ async function coreFormat(originalText, opts, addAlignmentSize = 0) {
   return { formatted: result.formatted, cursorOffset: -1, comments };
 }
 
-async function formatRange(originalText, opts) {
-  const { ast, text } = await parseText(originalText, opts);
+function formatRange(originalText, opts) {
+  const { ast, text } = parseText(originalText, opts);
   const { rangeStart, rangeEnd } = calculateRange(text, opts, ast);
   const rangeString = text.slice(rangeStart, rangeEnd);
 
@@ -146,7 +146,7 @@ async function formatRange(originalText, opts) {
 
   const alignmentSize = getAlignmentSize(indentString, opts.tabWidth);
 
-  const rangeResult = await coreFormat(
+  const rangeResult = coreFormat(
     rangeString,
     {
       ...opts,
@@ -260,20 +260,20 @@ function normalizeInputAndOptions(text, options) {
   };
 }
 
-async function hasPragma(text, options) {
-  const selectedParser = await resolveParser(options);
+function hasPragma(text, options) {
+  const selectedParser = resolveParser(options);
   return !selectedParser.hasPragma || selectedParser.hasPragma(text);
 }
 
-async function formatWithCursor(originalText, originalOptions) {
+function formatWithCursor(originalText, originalOptions) {
   let { hasBOM, text, options } = normalizeInputAndOptions(
     originalText,
-    await normalizeFormatOptions(originalOptions),
+    normalizeFormatOptions(originalOptions),
   );
 
   if (
     (options.rangeStart >= options.rangeEnd && text !== "") ||
-    (options.requirePragma && !(await hasPragma(text, options)))
+    (options.requirePragma && !(hasPragma(text, options)))
   ) {
     return {
       formatted: originalText,
@@ -285,17 +285,17 @@ async function formatWithCursor(originalText, originalOptions) {
   let result;
 
   if (options.rangeStart > 0 || options.rangeEnd < text.length) {
-    result = await formatRange(text, options);
+    result = formatRange(text, options);
   } else {
     if (
       !options.requirePragma &&
       options.insertPragma &&
       options.printer.insertPragma &&
-      !(await hasPragma(text, options))
+      !(hasPragma(text, options))
     ) {
       text = options.printer.insertPragma(text);
     }
-    result = await coreFormat(text, options);
+    result = coreFormat(text, options);
   }
 
   if (hasBOM) {
@@ -309,15 +309,15 @@ async function formatWithCursor(originalText, originalOptions) {
   return result;
 }
 
-async function parse(originalText, originalOptions, devOptions) {
+function parse(originalText, originalOptions, devOptions) {
   const { text, options } = normalizeInputAndOptions(
     originalText,
-    await normalizeFormatOptions(originalOptions),
+    normalizeFormatOptions(originalOptions),
   );
-  const parsed = await parseText(text, options);
+  const parsed = parseText(text, options);
   if (devOptions) {
     if (devOptions.preprocessForPrint) {
-      parsed.ast = await prepareToPrint(parsed.ast, options);
+      parsed.ast = prepareToPrint(parsed.ast, options);
     }
     if (devOptions.massage) {
       parsed.ast = massageAst(parsed.ast, options);
@@ -326,16 +326,16 @@ async function parse(originalText, originalOptions, devOptions) {
   return parsed;
 }
 
-async function formatAst(ast, options) {
-  options = await normalizeFormatOptions(options);
-  const doc = await printAstToDoc(ast, options);
+function formatAst(ast, options) {
+  options = normalizeFormatOptions(options);
+  const doc = printAstToDoc(ast, options);
   return printDocToStringWithoutNormalizeOptions(doc, options);
 }
 
 // Doesn't handle shebang for now
-async function formatDoc(doc, options) {
+function formatDoc(doc, options) {
   const text = printDocToDebug(doc);
-  const { formatted } = await formatWithCursor(text, {
+  const { formatted } = formatWithCursor(text, {
     ...options,
     parser: "__js_expression",
   });
@@ -343,16 +343,16 @@ async function formatDoc(doc, options) {
   return formatted;
 }
 
-async function printToDoc(originalText, options) {
-  options = await normalizeFormatOptions(options);
-  const { ast } = await parseText(originalText, options);
+function printToDoc(originalText, options) {
+  options = normalizeFormatOptions(options);
+  const { ast } = parseText(originalText, options);
   return printAstToDoc(ast, options);
 }
 
-async function printDocToString(doc, options) {
+function printDocToString(doc, options) {
   return printDocToStringWithoutNormalizeOptions(
     doc,
-    await normalizeFormatOptions(options),
+    normalizeFormatOptions(options),
   );
 }
 

@@ -3,7 +3,7 @@ import normalizeFormatOptions from "./normalize-format-options.js";
 import parse from "./parse.js";
 import createGetVisitorKeysFunction from "./create-get-visitor-keys-function.js";
 
-async function printEmbeddedLanguages(
+function printEmbeddedLanguages(
   /** @type {import("../common/ast-path.js").default} */ path,
   genericPrint,
   options,
@@ -41,7 +41,7 @@ async function printEmbeddedLanguages(
   for (const { print, node, pathStack } of embedCallResults) {
     try {
       path.stack = pathStack;
-      const doc = await print(textToDocForEmbed, genericPrint, path, options);
+      const doc = print(textToDocForEmbed, genericPrint, path, options);
 
       if (doc) {
         embeds.set(node, doc);
@@ -102,13 +102,13 @@ async function printEmbeddedLanguages(
   }
 }
 
-async function textToDoc(
+function textToDoc(
   text,
   partialNextOptions,
   parentOptions,
   printAstToDoc,
 ) {
-  const options = await normalizeFormatOptions(
+  const options = normalizeFormatOptions(
     {
       ...parentOptions,
       ...partialNextOptions,
@@ -118,8 +118,8 @@ async function textToDoc(
     { passThrough: true },
   );
 
-  const { ast } = await parse(text, options);
-  const doc = await printAstToDoc(ast, options);
+  const { ast } = parse(text, options);
+  const doc = printAstToDoc(ast, options);
 
   return stripTrailingHardline(doc);
 }

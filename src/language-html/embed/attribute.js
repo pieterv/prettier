@@ -52,8 +52,8 @@ function printAttribute(path, options) {
  * @returns {(textToDoc, print, path, options) => Promise<Doc>}
  */
 function printAttributeWithValuePrinter(printValue) {
-  return async (textToDoc, print, path, options) => {
-    let valueDoc = await printValue(textToDoc, print, path, options);
+  return (textToDoc, print, path, options) => {
+    let valueDoc = printValue(textToDoc, print, path, options);
 
     if (!valueDoc) {
       return;

@@ -4,7 +4,7 @@ import { mapDoc, replaceEndOfLine, cleanDoc } from "../../document/utils.js";
 import { printTemplateExpressions } from "../print/template-literal.js";
 import { isAngularComponentStyles } from "./utils.js";
 
-async function printEmbedCss(textToDoc, print, path /*, options*/) {
+function printEmbedCss(textToDoc, print, path /*, options*/) {
   const { node } = path;
 
   // Get full template literal with expressions replaced by placeholders
@@ -21,7 +21,7 @@ async function printEmbedCss(textToDoc, print, path /*, options*/) {
           currVal,
     "",
   );
-  const quasisDoc = await textToDoc(text, { parser: "scss" });
+  const quasisDoc = textToDoc(text, { parser: "scss" });
   const expressionDocs = printTemplateExpressions(path, print);
   const newDoc = replacePlaceholders(quasisDoc, expressionDocs);
   /* c8 ignore next 3 */

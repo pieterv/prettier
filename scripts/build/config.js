@@ -87,20 +87,20 @@ const extensions = {
 
 const pluginFiles = [
   "src/plugins/estree.js",
-  {
-    input: "src/plugins/babel.js",
-    replaceModule: [
-      {
-        // We don't use value of JSXText
-        module: require.resolve("@babel/parser"),
-        process: (text) =>
-          text.replaceAll(
-            "const entity = entities[desc];",
-            "const entity = undefined",
-          ),
-      },
-    ],
-  },
+  // {
+  //   input: "src/plugins/babel.js",
+  //   replaceModule: [
+  //     {
+  //       // We don't use value of JSXText
+  //       module: require.resolve("@babel/parser"),
+  //       process: (text) =>
+  //         text.replaceAll(
+  //           "const entity = entities[desc];",
+  //           "const entity = undefined"
+  //         ),
+  //     },
+  //   ],
+  // },
   {
     input: "src/plugins/flow.js",
     replaceModule: [
@@ -119,198 +119,198 @@ const pluginFiles = [
       },
     ],
   },
-  {
-    input: "src/plugins/typescript.js",
-    replaceModule: [
-      {
-        module: require.resolve("typescript"),
-        process: modifyTypescriptModule,
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/index.js",
-        ),
-        path: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/parser.js",
-        ),
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/parser.js",
-        ),
-        process(text) {
-          text = text
-            .replace('require("./create-program/createDefaultProgram")', "{}")
-            .replace('require("./create-program/createIsolatedProgram")', "{}")
-            .replace('require("./create-program/createProjectProgram")', "{}")
-            .replace('require("./create-program/useProvidedPrograms")', "{}");
-          return text;
-        },
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/parseSettings/createParseSettings.js",
-        ),
-        process(text) {
-          return text
-            .replace('require("./resolveProjectList")', "{}")
-            .replace(
-              'require("../create-program/shared")',
-              "{ensureAbsolutePath: path => path}",
-            )
-            .replace(
-              "process.cwd()",
-              JSON.stringify("/prettier-security-dirname-placeholder"),
-            )
-            .replace(
-              "parseSettings.projects = ",
-              "parseSettings.projects = [] || ",
-            );
-        },
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/parseSettings/inferSingleRun.js",
-        ),
-        text: "exports.inferSingleRun = () => false;",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/parseSettings/ExpiringCache.js",
-        ),
-        text: "exports.ExpiringCache = class {};",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/parseSettings/getProjectConfigFiles.js",
-        ),
-        text: "exports.resolveProjectList = () => [];",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/parseSettings/warnAboutTSVersion.js",
-        ),
-        text: "exports.warnAboutTSVersion = () => {};",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/create-program/getScriptKind.js",
-        ),
-        process: (text) =>
-          text.replace(
-            'require("path")',
-            '{extname: file => "." + file.split(".").pop()}',
-          ),
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/version-check.js",
-        ),
-        text: "exports.typescriptVersionIsAtLeast = new Proxy({}, {get: () => true})",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/create-program/createProjectService.js",
-        ),
-        text: "",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/create-program/getWatchProgramsForProjects.js",
-        ),
-        text: "",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/create-program/describeFilePath.js",
-        ),
-        text: "",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/create-program/createProjectProgram.js",
-        ),
-        text: "",
-      },
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/useProgramFromProjectService.js",
-        ),
-        text: "",
-      },
+  // {
+  //   input: "src/plugins/typescript.js",
+  //   replaceModule: [
+  //     {
+  //       module: require.resolve("typescript"),
+  //       process: modifyTypescriptModule,
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/index.js",
+  //       ),
+  //       path: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/parser.js",
+  //       ),
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/parser.js",
+  //       ),
+  //       process(text) {
+  //         text = text
+  //           .replace('require("./create-program/createDefaultProgram")', "{}")
+  //           .replace('require("./create-program/createIsolatedProgram")', "{}")
+  //           .replace('require("./create-program/createProjectProgram")', "{}")
+  //           .replace('require("./create-program/useProvidedPrograms")', "{}");
+  //         return text;
+  //       },
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/parseSettings/createParseSettings.js",
+  //       ),
+  //       process(text) {
+  //         return text
+  //           .replace('require("./resolveProjectList")', "{}")
+  //           .replace(
+  //             'require("../create-program/shared")',
+  //             "{ensureAbsolutePath: path => path}",
+  //           )
+  //           .replace(
+  //             "process.cwd()",
+  //             JSON.stringify("/prettier-security-dirname-placeholder"),
+  //           )
+  //           .replace(
+  //             "parseSettings.projects = ",
+  //             "parseSettings.projects = [] || ",
+  //           );
+  //       },
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/parseSettings/inferSingleRun.js",
+  //       ),
+  //       text: "exports.inferSingleRun = () => false;",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/parseSettings/ExpiringCache.js",
+  //       ),
+  //       text: "exports.ExpiringCache = class {};",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/parseSettings/getProjectConfigFiles.js",
+  //       ),
+  //       text: "exports.resolveProjectList = () => [];",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/parseSettings/warnAboutTSVersion.js",
+  //       ),
+  //       text: "exports.warnAboutTSVersion = () => {};",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/create-program/getScriptKind.js",
+  //       ),
+  //       process: (text) =>
+  //         text.replace(
+  //           'require("path")',
+  //           '{extname: file => "." + file.split(".").pop()}',
+  //         ),
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/version-check.js",
+  //       ),
+  //       text: "exports.typescriptVersionIsAtLeast = new Proxy({}, {get: () => true})",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/create-program/createProjectService.js",
+  //       ),
+  //       text: "",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/create-program/getWatchProgramsForProjects.js",
+  //       ),
+  //       text: "",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/create-program/describeFilePath.js",
+  //       ),
+  //       text: "",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/create-program/createProjectProgram.js",
+  //       ),
+  //       text: "",
+  //     },
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/useProgramFromProjectService.js",
+  //       ),
+  //       text: "",
+  //     },
 
-      // Only needed if `range`/`loc` in parse options is `false`
-      {
-        module: getPackageFile(
-          "@typescript-eslint/typescript-estree/dist/ast-converter.js",
-        ),
-        process: (text) => text.replace('require("./simple-traverse")', "{}"),
-      },
-      {
-        module: getPackageFile("debug/src/browser.js"),
-        path: path.join(dirname, "./shims/debug.js"),
-      },
-    ],
-  },
-  {
-    input: "src/plugins/acorn.js",
-    replaceModule: [
-      {
-        module: require.resolve("espree"),
-        process: (text) =>
-          text
-            .replaceAll(
-              /exports\.(?:Syntax|VisitorKeys|latestEcmaVersion|supportedEcmaVersions|tokenize|version) = .*?;/g,
-              "",
-            )
-            .replaceAll(
-              /const (Syntax|VisitorKeys|latestEcmaVersion|supportedEcmaVersions) = /g,
-              "const $1 = undefined && ",
-            )
-            .replace("require('eslint-visitor-keys')", "{}"),
-      },
-      {
-        // We don't use value of JSXText
-        module: getPackageFile("acorn-jsx/xhtml.js"),
-        text: "module.exports = {};",
-      },
-    ],
-  },
-  {
-    input: "src/plugins/meriyah.js",
-    replaceModule: [
-      {
-        // We don't use value of JSXText
-        module: await resolveEsmModulePath("meriyah"),
-        find: "parser.tokenValue = decodeHTMLStrict(raw);",
-        replacement: "parser.tokenValue = raw;",
-      },
-    ],
-  },
-  {
-    input: "src/plugins/angular.js",
-    replaceModule: [
-      // We only use a small set of `@angular/compiler` from `esm2022/src/expression_parser/`
-      // Those files can't be imported, they also not directly runnable, because `.mjs` extension is missing
-      {
-        module: getPackageFile("@angular/compiler/fesm2022/compiler.mjs"),
-        text: /* indent */ `
-          export * from '../esm2022/src/expression_parser/ast.mjs';
-          export {Lexer} from '../esm2022/src/expression_parser/lexer.mjs';
-          export {Parser} from '../esm2022/src/expression_parser/parser.mjs';
-        `,
-      },
-      ...[
-        "expression_parser/lexer.mjs",
-        "expression_parser/parser.mjs",
-        "ml_parser/interpolation_config.mjs",
-      ].map((file) => ({
-        module: getPackageFile(`@angular/compiler/esm2022/src/${file}`),
-        process: (text) =>
-          text.replaceAll(/(?<=import .*? from )'(.{1,2}\/.*)'/g, "'$1.mjs'"),
-      })),
-    ],
-  },
+  //     // Only needed if `range`/`loc` in parse options is `false`
+  //     {
+  //       module: getPackageFile(
+  //         "@typescript-eslint/typescript-estree/dist/ast-converter.js",
+  //       ),
+  //       process: (text) => text.replace('require("./simple-traverse")', "{}"),
+  //     },
+  //     {
+  //       module: getPackageFile("debug/src/browser.js"),
+  //       path: path.join(dirname, "./shims/debug.js"),
+  //     },
+  //   ],
+  // },
+  // {
+  //   input: "src/plugins/acorn.js",
+  //   replaceModule: [
+  //     {
+  //       module: require.resolve("espree"),
+  //       process: (text) =>
+  //         text
+  //           .replaceAll(
+  //             /exports\.(?:Syntax|VisitorKeys|latestEcmaVersion|supportedEcmaVersions|tokenize|version) = .*?;/g,
+  //             "",
+  //           )
+  //           .replaceAll(
+  //             /const (Syntax|VisitorKeys|latestEcmaVersion|supportedEcmaVersions) = /g,
+  //             "const $1 = undefined && ",
+  //           )
+  //           .replace("require('eslint-visitor-keys')", "{}"),
+  //     },
+  //     {
+  //       // We don't use value of JSXText
+  //       module: getPackageFile("acorn-jsx/xhtml.js"),
+  //       text: "module.exports = {};",
+  //     },
+  //   ],
+  // },
+  // {
+  //   input: "src/plugins/meriyah.js",
+  //   replaceModule: [
+  //     {
+  //       // We don't use value of JSXText
+  //       module: await resolveEsmModulePath("meriyah"),
+  //       find: "parser.tokenValue = decodeHTMLStrict(raw);",
+  //       replacement: "parser.tokenValue = raw;",
+  //     },
+  //   ],
+  // },
+  // {
+  //   input: "src/plugins/angular.js",
+  //   replaceModule: [
+  //     // We only use a small set of `@angular/compiler` from `esm2022/src/expression_parser/`
+  //     // Those files can't be imported, they also not directly runnable, because `.mjs` extension is missing
+  //     {
+  //       module: getPackageFile("@angular/compiler/fesm2022/compiler.mjs"),
+  //       text: /* indent */ `
+  //         export * from '../esm2022/src/expression_parser/ast.mjs';
+  //         export {Lexer} from '../esm2022/src/expression_parser/lexer.mjs';
+  //         export {Parser} from '../esm2022/src/expression_parser/parser.mjs';
+  //       `,
+  //     },
+  //     ...[
+  //       "expression_parser/lexer.mjs",
+  //       "expression_parser/parser.mjs",
+  //       "ml_parser/interpolation_config.mjs",
+  //     ].map((file) => ({
+  //       module: getPackageFile(`@angular/compiler/esm2022/src/${file}`),
+  //       process: (text) =>
+  //         text.replaceAll(/(?<=import .*? from )'(.{1,2}\/.*)'/g, "'$1.mjs'"),
+  //     })),
+  //   ],
+  // },
   {
     input: "src/plugins/postcss.js",
     replaceModule: [
@@ -362,34 +362,34 @@ const pluginFiles = [
       },
     ],
   },
-  {
-    input: "src/plugins/glimmer.js",
-    replaceModule: [
-      // See comment in `src/language-handlebars/parser-glimmer.js` file
-      {
-        module: getPackageFile(
-          "@glimmer/syntax/dist/commonjs/es2017/lib/parser/tokenizer-event-handlers.js",
-        ),
-        path: getPackageFile(
-          "@glimmer/syntax/dist/modules/es2017/lib/parser/tokenizer-event-handlers.js",
-        ),
-      },
-      // This passed to plugins, our plugin don't need access to the options
-      {
-        module: getPackageFile(
-          "@glimmer/syntax/dist/modules/es2017/lib/parser/tokenizer-event-handlers.js",
-        ),
-        process: (text) =>
-          text.replace(/\nconst syntax = \{.*?\n\};/su, "\nconst syntax = {};"),
-      },
-      {
-        module: getPackageFile("@handlebars/parser/dist/esm/index.js"),
-        path: getPackageFile("@handlebars/parser/dist/esm/parse.js"),
-      },
-    ],
-  },
+  // {
+  //   input: "src/plugins/glimmer.js",
+  //   replaceModule: [
+  //     // See comment in `src/language-handlebars/parser-glimmer.js` file
+  //     {
+  //       module: getPackageFile(
+  //         "@glimmer/syntax/dist/commonjs/es2017/lib/parser/tokenizer-event-handlers.js",
+  //       ),
+  //       path: getPackageFile(
+  //         "@glimmer/syntax/dist/modules/es2017/lib/parser/tokenizer-event-handlers.js",
+  //       ),
+  //     },
+  //     // This passed to plugins, our plugin don't need access to the options
+  //     {
+  //       module: getPackageFile(
+  //         "@glimmer/syntax/dist/modules/es2017/lib/parser/tokenizer-event-handlers.js",
+  //       ),
+  //       process: (text) =>
+  //         text.replace(/\nconst syntax = \{.*?\n\};/su, "\nconst syntax = {};"),
+  //     },
+  //     {
+  //       module: getPackageFile("@handlebars/parser/dist/esm/index.js"),
+  //       path: getPackageFile("@handlebars/parser/dist/esm/parse.js"),
+  //     },
+  //   ],
+  // },
   "src/plugins/html.js",
-  "src/plugins/yaml.js",
+  // "src/plugins/yaml.js",
 ].map((file) => {
   if (typeof file === "string") {
     file = { input: file };
@@ -400,9 +400,8 @@ const pluginFiles = [
   outputBaseName ??= input.match(/\/plugins\/(?<outputBaseName>.*?)\.js$/)
     .groups.outputBaseName;
 
-  const umdVariableName = `prettierPlugins.${
-    umdPropertyName ?? outputBaseName
-  }`;
+  const umdVariableName = `prettierPlugins.${umdPropertyName ?? outputBaseName
+    }`;
 
   return {
     input,
@@ -415,36 +414,32 @@ const pluginFiles = [
 
 const nonPluginUniversalFiles = [
   {
-    input: "src/document/public.js",
-    outputBaseName: "doc",
-    umdVariableName: "doc",
-    minify: false,
+    input: "src/main/ast-to-doc.js",
+    outputBaseName: "ast-to-doc",
+    umdVariableName: "astToDoc",
+    // minify: false,
   },
-  {
-    input: "src/standalone.js",
-    umdVariableName: "prettier",
-    replaceModule: [
-      {
-        module: require.resolve("@babel/highlight", {
-          paths: [require.resolve("@babel/code-frame")],
-        }),
-        path: path.join(dirname, "./shims/babel-highlight.js"),
-      },
-      {
-        module: require.resolve("chalk", {
-          paths: [require.resolve("@babel/code-frame")],
-        }),
-        path: path.join(dirname, "./shims/chalk.cjs"),
-      },
-      {
-        module: require.resolve("chalk", {
-          paths: [require.resolve("vnopts")],
-        }),
-        path: path.join(dirname, "./shims/chalk.cjs"),
-      },
-      replaceDiffPackageEntry("lib/diff/array.js"),
-    ],
-  },
+  // {
+  //   input: "src/document/public.js",
+  //   outputBaseName: "doc",
+  //   umdVariableName: "doc",
+  //   minify: false,
+  // },
+  // {
+  //   input: "src/standalone.js",
+  //   umdVariableName: "prettier",
+  //   replaceModule: [
+  //     {
+  //       module: require.resolve("@babel/highlight"),
+  //       path: path.join(dirname, "./shims/babel-highlight.js"),
+  //     },
+  //     {
+  //       module: createRequire(require.resolve("vnopts")).resolve("chalk"),
+  //       path: path.join(dirname, "./shims/chalk.js"),
+  //     },
+  //     replaceDiffPackageEntry("lib/diff/array.js"),
+  //   ],
+  // },
 ].map((file) => {
   const {
     input,
@@ -470,10 +465,10 @@ const universalFiles = [...nonPluginUniversalFiles, ...pluginFiles].flatMap(
 
     return [
       ...[
-        {
-          format: "esm",
-          file: `${outputBaseName}${extensions.esm}`,
-        },
+        // {
+        //   format: "esm",
+        //   file: `${outputBaseName}${extensions.esm}`,
+        // },
         {
           format: "umd",
           file: `${outputBaseName}${extensions.umd}`,
@@ -491,91 +486,91 @@ const universalFiles = [...nonPluginUniversalFiles, ...pluginFiles].flatMap(
         build: buildJavascriptModule,
         kind: "javascript",
       })),
-      getTypesFileConfig({ input, outputBaseName, isPlugin }),
+      // getTypesFileConfig({ input, outputBaseName, isPlugin }),
     ];
   },
 );
 
 const nodejsFiles = [
-  {
-    input: "src/index.js",
-    replaceModule: [
-      {
-        module: require.resolve("@iarna/toml/lib/toml-parser.js"),
-        find: "const utilInspect = eval(\"require('util').inspect\")",
-        replacement: "const utilInspect = require('util').inspect",
-      },
-      // `editorconfig` use a older version of `semver` and only uses `semver.gte`
-      {
-        module: require.resolve("editorconfig"),
-        find: 'var semver = __importStar(require("semver"));',
-        replacement: `
-          var semver = {
-            gte: require(${JSON.stringify(
-              require.resolve("semver/functions/gte"),
-            )})
-          };
-        `,
-      },
-      {
-        module: require.resolve("n-readlines"),
-        find: "const readBuffer = new Buffer(this.options.readChunk);",
-        replacement: "const readBuffer = Buffer.alloc(this.options.readChunk);",
-      },
-      replaceDiffPackageEntry("lib/diff/array.js"),
-      // `@babel/code-frame` and `@babel/highlight` use compatible `chalk`, but they installed separately
-      {
-        module: require.resolve("chalk", {
-          paths: [require.resolve("@babel/highlight")],
-        }),
-        path: require.resolve("chalk", {
-          paths: [require.resolve("@babel/code-frame")],
-        }),
-      },
-    ],
-    addDefaultExport: true,
-  },
+  // {
+  //   input: "src/index.js",
+  //   replaceModule: [
+  //     {
+  //       module: require.resolve("@iarna/toml/lib/toml-parser.js"),
+  //       find: "const utilInspect = eval(\"require('util').inspect\")",
+  //       replacement: "const utilInspect = require('util').inspect",
+  //     },
+  //     // `editorconfig` use a older version of `semver` and only uses `semver.gte`
+  //     {
+  //       module: require.resolve("editorconfig"),
+  //       find: 'var semver = __importStar(require("semver"));',
+  //       replacement: `
+  //         var semver = {
+  //           gte: require(${JSON.stringify(
+  //             require.resolve("semver/functions/gte"),
+  //           )})
+  //         };
+  //       `,
+  //     },
+  //     {
+  //       module: require.resolve("n-readlines"),
+  //       find: "const readBuffer = new Buffer(this.options.readChunk);",
+  //       replacement: "const readBuffer = Buffer.alloc(this.options.readChunk);",
+  //     },
+  //     replaceDiffPackageEntry("lib/diff/array.js"),
+  //     // `@babel/code-frame` and `@babel/highlight` use compatible `chalk`, but they installed separately
+  //     {
+  //       module: require.resolve("chalk", {
+  //         paths: [require.resolve("@babel/highlight")],
+  //       }),
+  //       path: require.resolve("chalk", {
+  //         paths: [require.resolve("@babel/code-frame")],
+  //       }),
+  //     },
+  //   ],
+  //   addDefaultExport: true,
+  // },
   {
     input: "src/index.cjs",
   },
-  {
-    input: "bin/prettier.cjs",
-    outputBaseName: "bin/prettier",
-    target: ["node0.10"],
-    replaceModule: [
-      {
-        module: path.join(PROJECT_ROOT, "bin/prettier.cjs"),
-        process: (text) =>
-          text.replace('"../src/cli/index.js"', '"../internal/cli.mjs"'),
-      },
-    ],
-  },
-  {
-    input: "src/cli/index.js",
-    outputBaseName: "internal/cli",
-    external: ["benchmark"],
-    replaceModule: [replaceDiffPackageEntry("lib/patch/create.js")],
-  },
-  {
-    input: "src/common/mockable.js",
-    outputBaseName: "internal/internal",
-    replaceModule: [
-      // cosmiconfig@6 -> import-fresh can't find parentModule, since module is bundled
-      {
-        module: require.resolve("parent-module"),
-        path: path.join(dirname, "./shims/parent-module.cjs"),
-      },
-      // `@babel/code-frame` and `@babel/highlight` use compatible `chalk`, but they installed separately
-      {
-        module: require.resolve("chalk", {
-          paths: [require.resolve("@babel/highlight")],
-        }),
-        path: require.resolve("chalk", {
-          paths: [require.resolve("@babel/code-frame")],
-        }),
-      },
-    ],
-  },
+  // {
+  //   input: "bin/prettier.cjs",
+  //   outputBaseName: "bin/prettier",
+  //   target: ["node0.10"],
+  //   replaceModule: [
+  //     {
+  //       module: path.join(PROJECT_ROOT, "bin/prettier.cjs"),
+  //       process: (text) =>
+  //         text.replace('"../src/cli/index.js"', '"../internal/cli.mjs"'),
+  //     },
+  //   ],
+  // },
+  // {
+  //   input: "src/cli/index.js",
+  //   outputBaseName: "internal/cli",
+  //   external: ["benchmark"],
+  //   replaceModule: [replaceDiffPackageEntry("lib/patch/create.js")],
+  // },
+  // {
+  //   input: "src/common/mockable.js",
+  //   outputBaseName: "internal/internal",
+  //   replaceModule: [
+  //     // cosmiconfig@6 -> import-fresh can't find parentModule, since module is bundled
+  //     {
+  //       module: require.resolve("parent-module"),
+  //       path: path.join(dirname, "./shims/parent-module.cjs"),
+  //     },
+  //     // `@babel/code-frame` and `@babel/highlight` use compatible `chalk`, but they installed separately
+  //     {
+  //       module: require.resolve("chalk", {
+  //         paths: [require.resolve("@babel/highlight")],
+  //       }),
+  //       path: require.resolve("chalk", {
+  //         paths: [require.resolve("@babel/code-frame")],
+  //       }),
+  //     },
+  //   ],
+  // },
 ].flatMap((file) => {
   let { input, output, outputBaseName, ...buildOptions } = file;
 
@@ -594,26 +589,26 @@ const nodejsFiles = [
       build: buildJavascriptModule,
       kind: "javascript",
     },
-    getTypesFileConfig({ input, outputBaseName }),
+    // getTypesFileConfig({ input, outputBaseName }),
   ];
 });
 
 const metaFiles = [
-  {
-    input: "package.json",
-    output: {
-      format: "json",
-    },
-    build: buildPackageJson,
-  },
-  {
-    input: "README.md",
-    build: copyFileBuilder,
-  },
-  {
-    input: "LICENSE",
-    build: buildLicense,
-  },
+  // {
+  //   input: "package.json",
+  //   output: {
+  //     format: "json",
+  //   },
+  //   build: buildPackageJson,
+  // },
+  // {
+  //   input: "README.md",
+  //   build: copyFileBuilder,
+  // },
+  // {
+  //   input: "LICENSE",
+  //   build: buildLicense,
+  // },
 ].map((file) => ({
   ...file,
   output: { file: file.input, ...file.output },

@@ -353,15 +353,15 @@ const pluginFiles = [
     ],
   },
   "src/plugins/graphql.js",
-  {
-    input: "src/plugins/markdown.js",
-    replaceModule: [
-      {
-        module: getPackageFile("parse-entities/decode-entity.browser.js"),
-        path: getPackageFile("parse-entities/decode-entity.js"),
-      },
-    ],
-  },
+  // {
+  //   input: "src/plugins/markdown.js",
+  //   replaceModule: [
+  //     {
+  //       module: getPackageFile("parse-entities/decode-entity.browser.js"),
+  //       path: getPackageFile("parse-entities/decode-entity.js"),
+  //     },
+  //   ],
+  // },
   // {
   //   input: "src/plugins/glimmer.js",
   //   replaceModule: [
@@ -388,7 +388,7 @@ const pluginFiles = [
   //     },
   //   ],
   // },
-  "src/plugins/html.js",
+  // "src/plugins/html.js",
   // "src/plugins/yaml.js",
 ].map((file) => {
   if (typeof file === "string") {

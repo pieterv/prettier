@@ -269,6 +269,9 @@ function printFlow(path, options, print) {
     case "TypePredicate":
       return printTypePredicate(path, print);
 
+    case "TypeOperator":
+      return [node.operator, " ", print("typeAnnotation")];
+
     case "TypeParameterDeclaration":
     case "TypeParameterInstantiation":
       return printTypeParameters(path, options, print, "params");

@@ -35,8 +35,7 @@ function printComponent(path, options, print) {
 
   const parametersDoc = printComponentParameters(path, print, options);
   if (node.rendersType) {
-    const renderTypesDoc = path.call((path) => print("typeAnnotation"), "rendersType");
-    parts.push(group([parametersDoc, " renders ", renderTypesDoc]));
+    parts.push(group([parametersDoc, " ", print("rendersType")]));
   } else {
     parts.push(group([parametersDoc]));
   }

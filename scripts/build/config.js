@@ -418,6 +418,27 @@ const nonPluginUniversalFiles = [
     outputBaseName: "ast-to-doc",
     umdVariableName: "astToDoc",
     // minify: false,
+    replaceModule: [
+      {
+        module: require.resolve("@babel/highlight", {
+          paths: [require.resolve("@babel/code-frame")],
+        }),
+        path: path.join(dirname, "./shims/babel-highlight.js"),
+      },
+      {
+        module: require.resolve("chalk", {
+          paths: [require.resolve("@babel/code-frame")],
+        }),
+        path: path.join(dirname, "./shims/chalk.cjs"),
+      },
+      {
+        module: require.resolve("chalk", {
+          paths: [require.resolve("vnopts")],
+        }),
+        path: path.join(dirname, "./shims/chalk.cjs"),
+      },
+      replaceDiffPackageEntry("lib/diff/array.js"),
+    ],
   },
   // {
   //   input: "src/document/public.js",
@@ -430,12 +451,22 @@ const nonPluginUniversalFiles = [
   //   umdVariableName: "prettier",
   //   replaceModule: [
   //     {
-  //       module: require.resolve("@babel/highlight"),
+  //       module: require.resolve("@babel/highlight", {
+  //         paths: [require.resolve("@babel/code-frame")],
+  //       }),
   //       path: path.join(dirname, "./shims/babel-highlight.js"),
   //     },
   //     {
-  //       module: createRequire(require.resolve("vnopts")).resolve("chalk"),
-  //       path: path.join(dirname, "./shims/chalk.js"),
+  //       module: require.resolve("chalk", {
+  //         paths: [require.resolve("@babel/code-frame")],
+  //       }),
+  //       path: path.join(dirname, "./shims/chalk.cjs"),
+  //     },
+  //     {
+  //       module: require.resolve("chalk", {
+  //         paths: [require.resolve("vnopts")],
+  //       }),
+  //       path: path.join(dirname, "./shims/chalk.cjs"),
   //     },
   //     replaceDiffPackageEntry("lib/diff/array.js"),
   //   ],

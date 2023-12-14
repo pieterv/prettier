@@ -119,6 +119,8 @@ function needsParens(path, options) {
         case "using":
         case "yield":
         case "let":
+        case "component":
+        case "hook":
         case "type": {
           const ancestorNeitherAsNorSatisfies = path.findAncestor(
             (node) => !isBinaryCastExpression(node),

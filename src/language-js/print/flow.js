@@ -54,6 +54,7 @@ import {
 } from "./component.js";
 import {
   printHook,
+  printHookTypeAnnotation,
 } from "./hook.js";
 
 function printFlow(path, options, print) {
@@ -77,8 +78,9 @@ function printFlow(path, options, print) {
       return printComponentTypeParameter(path, options, print);
     case "HookDeclaration":
     case "DeclareHook":
-    case "HookTypeAnnotation":
       return printHook(path, options, print);
+    case "HookTypeAnnotation":
+      return printHookTypeAnnotation(path, options, print);
     case "DeclareClass":
       return printClass(path, options, print);
     case "DeclareFunction":

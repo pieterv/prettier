@@ -48,13 +48,26 @@ function printHook(path, options, print) {
 }
 
 /*
+`HookTypeAnnotation` is ambiguous:
+- `declare hook useFoo(a: B): void;`
+- `var A: hook (a: B) => void;`
+*/
+function isDeclareHookTypeAnnotation(path) {
+  const { node } = path;
+  return (
+    node.type === "HookTypeAnnotation" &&
+        path.getParentNode(2)?.type === "DeclareHook"
+  );
+}
+
+/*
 - "HookTypeAnnotation"
 */
 function printHookTypeAnnotation(path, options, print) {
   const { node } = path;
   const parts = [];
 
-  return [];
+  parts.push(isDeclareHookTypeAnnotation(path) ? "" : "hook");
 
   let parametersDoc = printFunctionParameters(
     path,
@@ -65,7 +78,10 @@ function printHookTypeAnnotation(path, options, print) {
   );
 
   const returnTypeDoc = [];
-  returnTypeDoc.push(": ", print("returnType"));
+  returnTypeDoc.push(
+    isDeclareHookTypeAnnotation(path) ? ": " : " => ",
+    print("returnType"),
+  );
 
   if (shouldGroupFunctionParameters(node, returnTypeDoc)) {
     parametersDoc = group(parametersDoc);

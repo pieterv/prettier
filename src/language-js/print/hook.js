@@ -1,8 +1,9 @@
-import {
-  group,
-} from "../../document/builders.js";
+import { group } from "../../document/builders.js";
 import { printDeclareToken } from "./misc.js";
-import { printFunctionParameters, shouldGroupFunctionParameters } from "./function-parameters.js";
+import {
+  printFunctionParameters,
+  shouldGroupFunctionParameters,
+} from "./function-parameters.js";
 import { printReturnType } from "./function.js";
 
 /**
@@ -17,14 +18,18 @@ import { printReturnType } from "./function.js";
 function printHook(path, options, print) {
   const { node } = path;
 
-  console.log(node);
-
   const parts = [printDeclareToken(path), "hook"];
   if (node.id) {
     parts.push(" ", print("id"));
   }
 
-  const parametersDoc = printFunctionParameters(path, print, options, false, true);
+  const parametersDoc = printFunctionParameters(
+    path,
+    print,
+    options,
+    false,
+    true,
+  );
   const returnTypeDoc = printReturnType(path, print);
   const shouldGroupParameters = shouldGroupFunctionParameters(
     node,
@@ -56,7 +61,7 @@ function isDeclareHookTypeAnnotation(path) {
   const { node } = path;
   return (
     node.type === "HookTypeAnnotation" &&
-        path.getParentNode(2)?.type === "DeclareHook"
+    path.getParentNode(2)?.type === "DeclareHook"
   );
 }
 
@@ -67,7 +72,7 @@ function printHookTypeAnnotation(path, options, print) {
   const { node } = path;
   const parts = [];
 
-  parts.push(isDeclareHookTypeAnnotation(path) ? "" : "hook");
+  parts.push(isDeclareHookTypeAnnotation(path) ? "" : "hook ");
 
   let parametersDoc = printFunctionParameters(
     path,

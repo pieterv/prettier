@@ -52,10 +52,7 @@ import {
   printComponentParameter,
   printComponentTypeParameter,
 } from "./component.js";
-import {
-  printHook,
-  printHookTypeAnnotation,
-} from "./hook.js";
+import { printHook, printHookTypeAnnotation } from "./hook.js";
 
 function printFlow(path, options, print) {
   const { node } = path;

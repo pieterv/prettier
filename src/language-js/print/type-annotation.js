@@ -459,6 +459,21 @@ const getTypeAnnotationFirstToken = (path) => {
       (node, key) => key === "id" && node.type === "DeclareFunction",
     ) ||
     /*
+
+    /*
+    Flow
+
+    ```js
+    declare hook foo(): void;
+                        ^^^^^^^^ `TypeAnnotation`
+    ```
+    */
+    path.match(
+      (node) => node.type === "TypeAnnotation",
+      (node, key) => key === "typeAnnotation" && node.type === "Identifier",
+      (node, key) => key === "id" && node.type === "DeclareHook",
+    ) ||
+    /*
     Flow
 
     ```js

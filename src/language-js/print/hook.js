@@ -13,12 +13,11 @@ import { printReturnType } from "./function.js";
 
 /*
 - "HookDeclaration"
-- "DeclareHook"
 */
 function printHook(path, options, print) {
   const { node } = path;
 
-  const parts = [printDeclareToken(path), "hook"];
+  const parts = ["hook"];
   if (node.id) {
     parts.push(" ", print("id"));
   }
@@ -45,7 +44,21 @@ function printHook(path, options, print) {
     print("body"),
   );
 
-  if (options.semi && (node.declare || !node.body)) {
+  return parts;
+}
+
+/*
+- "DeclareHook"
+*/
+function printDeclareHook(path, options, print) {
+  const { node } = path;
+
+  const parts = [printDeclareToken(path), "hook"];
+  if (node.id) {
+    parts.push(" ", print("id"));
+  }
+
+  if (options.semi) {
     parts.push(";");
   }
 
@@ -97,4 +110,4 @@ function printHookTypeAnnotation(path, options, print) {
   return group(parts);
 }
 
-export { printHook, printHookTypeAnnotation };
+export { printHook, printDeclareHook, printHookTypeAnnotation };

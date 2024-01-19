@@ -10,7 +10,6 @@ import getNextNonSpaceNonCommentCharacter from "../../utils/get-next-non-space-n
 import { printDanglingComments } from "../../main/comments/print.js";
 import { locEnd } from "../loc.js";
 import { shouldPrintComma, isNextLineEmpty } from "../utils/index.js";
-import { printTypeAnnotationProperty } from "./type-annotation.js";
 import { printDeclareToken } from "./misc.js";
 
 /**
@@ -65,7 +64,7 @@ function printComponentParameters(path, print, options) {
         filter: (comment) =>
           getNextNonSpaceNonCommentCharacter(
             options.originalText,
-            locEnd(comment)
+            locEnd(comment),
           ) === ")",
       }),
       ")",
@@ -97,7 +96,7 @@ function printComponentParameters(path, print, options) {
       shouldPrintComma(options, "all") &&
         !hasRestParameter(componentNode, parameters)
         ? ","
-        : ""
+        : "",
     ),
     softline,
     ")",

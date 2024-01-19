@@ -110,6 +110,8 @@ const shouldOmitSemicolon = createTypeCheckFunction([
   "DeclareComponent",
   "DeclareClass",
   "DeclareFunction",
+  "DeclareHook",
+  "HookDeclaration",
   "TSDeclareFunction",
   "EnumDeclaration",
 ]);

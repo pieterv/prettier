@@ -95,10 +95,10 @@ function needsParens(path, options) {
       const expression = !statement
         ? undefined
         : statement.type === "ExpressionStatement"
-          ? statement.expression
-          : statement.type === "ForStatement"
-            ? statement.init
-            : statement.left;
+        ? statement.expression
+        : statement.type === "ForStatement"
+        ? statement.init
+        : statement.left;
       if (
         expression &&
         startsWithNoLookaheadToken(
@@ -119,6 +119,8 @@ function needsParens(path, options) {
         case "using":
         case "yield":
         case "let":
+        case "component":
+        case "hook":
         case "type": {
           const ancestorNeitherAsNorSatisfies = path.findAncestor(
             (node) => !isBinaryCastExpression(node),
@@ -991,6 +993,7 @@ const isStatement = createTypeCheckFunction([
   "DeclareExportAllDeclaration",
   "DeclareExportDeclaration",
   "DeclareFunction",
+  "DeclareHook",
   "DeclareInterface",
   "DeclareModule",
   "DeclareModuleExports",
@@ -1006,6 +1009,7 @@ const isStatement = createTypeCheckFunction([
   "ForOfStatement",
   "ForStatement",
   "FunctionDeclaration",
+  "HookDeclaration",
   "IfStatement",
   "ImportDeclaration",
   "InterfaceDeclaration",

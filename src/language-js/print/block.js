@@ -36,6 +36,7 @@ function printBlock(path, options, print) {
         parent.type === "FunctionExpression" ||
         parent.type === "FunctionDeclaration" ||
         parent.type === "ComponentDeclaration" ||
+        parent.type === "HookDeclaration" ||
         parent.type === "ObjectMethod" ||
         parent.type === "ClassMethod" ||
         parent.type === "ClassPrivateMethod" ||

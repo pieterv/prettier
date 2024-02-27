@@ -273,7 +273,7 @@ function formatWithCursor(originalText, originalOptions) {
 
   if (
     (options.rangeStart >= options.rangeEnd && text !== "") ||
-    (options.requirePragma && !(hasPragma(text, options)))
+    (options.requirePragma && !hasPragma(text, options))
   ) {
     return {
       formatted: originalText,
@@ -291,7 +291,7 @@ function formatWithCursor(originalText, originalOptions) {
       !options.requirePragma &&
       options.insertPragma &&
       options.printer.insertPragma &&
-      !(hasPragma(text, options))
+      !hasPragma(text, options)
     ) {
       text = options.printer.insertPragma(text);
     }

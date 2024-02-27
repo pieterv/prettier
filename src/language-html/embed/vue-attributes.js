@@ -69,7 +69,7 @@ function printVueAttribute(path, options) {
 }
 
 /**
- * @returns {Promise<Doc>}
+ * @returns {Doc}
  */
 function printVueVOnDirective(text, textToDoc, { parseWithTs }) {
   if (isVueEventBindingExpression(text)) {
@@ -85,7 +85,7 @@ function printVueVOnDirective(text, textToDoc, { parseWithTs }) {
 }
 
 /**
- * @returns {Promise<Doc>}
+ * @returns {Doc}
  */
 function printVueVBindDirective(text, textToDoc, { parseWithTs }) {
   return formatAttributeValue(
@@ -97,7 +97,7 @@ function printVueVBindDirective(text, textToDoc, { parseWithTs }) {
 }
 
 /**
- * @returns {Promise<Doc>}
+ * @returns {Doc}
  */
 function printExpression(text, textToDoc, { parseWithTs }) {
   return formatAttributeValue(

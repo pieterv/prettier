@@ -185,7 +185,7 @@ function isLineAfterElementEmpty({ node }, { originalText: text }) {
 
     currentIdx = skipInlineComment(
       text,
-      skipTrailingComment(text, currentIdx + 1)
+      skipTrailingComment(text, currentIdx + 1),
     );
   }
 

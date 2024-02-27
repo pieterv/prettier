@@ -5,7 +5,7 @@ import { formatAttributeValue } from "./utils.js";
  */
 
 /**
- * @returns {Promise<Doc>}
+ * @returns {Doc}
  */
 function printVueBindings(text, textToDoc, { parseWithTs }) {
   return formatAttributeValue(`function _(${text}) {}`, textToDoc, {

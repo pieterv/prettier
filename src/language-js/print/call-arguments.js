@@ -25,7 +25,7 @@ import {
   isFunctionCompositionArgs,
   isJsxElement,
   isLongCurriedCallExpression,
-  isNextLineEmpty, 
+  isNextLineEmpty,
   isObjectOrRecordExpression,
   isObjectProperty,
   isRegExpLiteral,

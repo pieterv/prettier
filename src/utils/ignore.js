@@ -28,13 +28,13 @@ function getRelativePath(file, ignoreFile) {
 /**
  * @param {string | URL | undefined} ignoreFile
  * @param {boolean} [withNodeModules]
- * @returns {Promise<(file: string | URL) => boolean>}
+ * @returns {(file: string | URL) => boolean}
  */
 function createSingleIsIgnoredFunction(ignoreFile, withNodeModules) {
   let content = "";
 
   if (ignoreFile) {
-    content += (readFile(ignoreFile)) ?? "";
+    content += readFile(ignoreFile) ?? "";
   }
 
   if (!withNodeModules) {
@@ -53,7 +53,7 @@ function createSingleIsIgnoredFunction(ignoreFile, withNodeModules) {
 /**
  * @param {(string | URL)[]} ignoreFiles
  * @param {boolean?} withNodeModules
- * @returns {Promise<(file: string | URL) => boolean>}
+ * @returns {(file: string | URL) => boolean}
  */
 function createIsIgnoredFunction(ignoreFiles, withNodeModules) {
   // If `ignoreFilePaths` is empty, we still want `withNodeModules` to work
@@ -61,11 +61,11 @@ function createIsIgnoredFunction(ignoreFiles, withNodeModules) {
     ignoreFiles = [undefined];
   }
 
-  const isIgnoredFunctions = (
-    ignoreFiles.map((ignoreFile) =>
+  const isIgnoredFunctions = ignoreFiles
+    .map((ignoreFile) =>
       createSingleIsIgnoredFunction(ignoreFile, withNodeModules),
     )
-  ).filter(Boolean);
+    .filter(Boolean);
 
   return (file) => isIgnoredFunctions.some((isIgnored) => isIgnored(file));
 }
@@ -73,7 +73,7 @@ function createIsIgnoredFunction(ignoreFiles, withNodeModules) {
 /**
  * @param {string | URL} file
  * @param {{ignorePath: string[], withNodeModules?: boolean}} options
- * @returns {Promise<boolean>}
+ * @returns {boolean}
  */
 function isIgnored(file, options) {
   const { ignorePath: ignoreFiles, withNodeModules } = options;

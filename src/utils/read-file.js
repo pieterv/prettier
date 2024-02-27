@@ -4,7 +4,7 @@ import { isUrlString } from "url-or-path";
 
 /**
  * @param {string | URL} file
- * @returns {Promise<undefined | string>}
+ * @returns {undefined | string}
  */
 function readFile(file) {
   if (isUrlString(file)) {

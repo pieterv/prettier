@@ -453,7 +453,7 @@ const pluginFiles = [
   //         );
   //
   //         text = text.replace(/(?<=\n)export .*?;/, "export { preprocess };");
-  // 
+  //
   //         return text;
   //       },
   //     },
@@ -464,7 +464,7 @@ const pluginFiles = [
   //   ],
   // },
   // "src/plugins/html.js",
-  // "src/plugins/yaml.js", 
+  // "src/plugins/yaml.js",
 ].map((file) => {
   if (typeof file === "string") {
     file = { input: file };
@@ -475,8 +475,9 @@ const pluginFiles = [
   outputBaseName ??= input.match(/\/plugins\/(?<outputBaseName>.*?)\.js$/)
     .groups.outputBaseName;
 
-  const umdVariableName = `prettierPlugins.${umdPropertyName ?? outputBaseName
-    }`;
+  const umdVariableName = `prettierPlugins.${
+    umdPropertyName ?? outputBaseName
+  }`;
 
   return {
     input,

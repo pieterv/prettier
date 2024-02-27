@@ -32,7 +32,11 @@ import {
   printComponentParameter,
   printComponentTypeParameter,
 } from "./component.js";
-import { printHook, printDeclareHook, printHookTypeAnnotation } from "./hook.js";
+import {
+  printHook,
+  printDeclareHook,
+  printHookTypeAnnotation,
+} from "./hook.js";
 import {
   printArrayType,
   printFunctionType,

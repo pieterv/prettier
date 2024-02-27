@@ -10,7 +10,7 @@ import {
   isBinaryCastExpression,
   isBitwiseOperator,
   isCallExpression,
-  isMemberExpression, 
+  isMemberExpression,
   isObjectOrRecordExpression,
   isObjectProperty,
   shouldFlatten,

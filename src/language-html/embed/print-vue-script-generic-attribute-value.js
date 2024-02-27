@@ -6,7 +6,7 @@ import { formatAttributeValue, shouldHugJsExpression } from "./utils.js";
  */
 
 /**
- * @returns {Promise<Doc>}
+ * @returns {Doc}
  */
 function printVueScriptGenericAttributeValue(textToDoc, print, path) {
   const { node } = path;

@@ -102,12 +102,7 @@ function printEmbeddedLanguages(
   }
 }
 
-function textToDoc(
-  text,
-  partialNextOptions,
-  parentOptions,
-  printAstToDoc,
-) {
+function textToDoc(text, partialNextOptions, parentOptions, printAstToDoc) {
   const options = normalizeFormatOptions(
     {
       ...parentOptions,

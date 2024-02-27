@@ -48,8 +48,8 @@ function printAttribute(path, options) {
 }
 
 /**
- * @param {(textToDoc, print, path, options) => Promise<Doc>} printValue
- * @returns {(textToDoc, print, path, options) => Promise<Doc>}
+ * @param {(textToDoc, print, path, options) => Doc} printValue
+ * @returns {(textToDoc, print, path, options) => Doc}
  */
 function printAttributeWithValuePrinter(printValue) {
   return (textToDoc, print, path, options) => {

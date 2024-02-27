@@ -1,30 +1,30 @@
-import { printDanglingComments } from "../../main/comments/print.js";
 import {
+  group,
+  hardline,
+  ifBreak,
+  indent,
+  indentIfBreak,
   join,
   line,
-  hardline,
-  softline,
-  group,
-  indent,
-  ifBreak,
   lineSuffixBoundary,
-  indentIfBreak,
+  softline,
 } from "../../document/builders.js";
-import {
-  isTestCall,
-  hasComment,
-  CommentCheckFlags,
-  shouldPrintComma,
-  getFunctionParameters,
-  isObjectType,
-} from "../utils/index.js";
+import { printDanglingComments } from "../../main/comments/print.js";
 import createGroupIdMapper from "../../utils/create-group-id-mapper.js";
+import {
+  CommentCheckFlags,
+  getFunctionParameters,
+  hasComment,
+  isObjectType,
+  isTestCall,
+  shouldPrintComma,
+} from "../utils/index.js";
+import { isArrowFunctionVariableDeclarator } from "./assignment.js";
+import { printTypeScriptMappedTypeModifier } from "./mapped-type.js";
 import {
   printTypeAnnotationProperty,
   shouldHugType,
 } from "./type-annotation.js";
-import { isArrowFunctionVariableDeclarator } from "./assignment.js";
-import { printTypeScriptMappedTypeModifier } from "./mapped-type.js";
 
 const getTypeParametersGroupId = createGroupIdMapper("typeParameters");
 
@@ -87,10 +87,10 @@ function printTypeParameters(path, options, print, paramsKey) {
     node.type === "TSTypeParameterInstantiation" // https://github.com/microsoft/TypeScript/issues/21984
       ? ""
       : shouldForceTrailingComma(path, options, paramsKey)
-      ? ","
-      : shouldPrintComma(options)
-      ? ifBreak(",")
-      : "";
+        ? ","
+        : shouldPrintComma(options)
+          ? ifBreak(",")
+          : "";
 
   return group(
     [
@@ -189,4 +189,4 @@ function printTypeParameter(path, options, print) {
   return group(parts);
 }
 
-export { printTypeParameter, printTypeParameters, getTypeParametersGroupId };
+export { getTypeParametersGroupId, printTypeParameter, printTypeParameters };

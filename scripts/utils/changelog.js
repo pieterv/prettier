@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+
 import createEsmUtils from "esm-utils";
 import semver from "semver";
 
@@ -31,10 +32,10 @@ export function getEntries(dirPath) {
     const section = title.includes("[HIGHLIGHT]")
       ? "highlight"
       : title.includes("[BREAKING]")
-      ? "breaking"
-      : improvement
-      ? "improvement"
-      : undefined;
+        ? "breaking"
+        : improvement
+          ? "improvement"
+          : undefined;
 
     const order =
       section === "improvement" && improvement[2] !== undefined

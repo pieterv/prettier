@@ -1,9 +1,10 @@
 import { parse as parseTypeScript } from "@typescript-eslint/typescript-estree";
+
 import createError from "../../common/parser-create-error.js";
 import tryCombinations from "../../utils/try-combinations.js";
+import postprocess from "./postprocess/index.js";
 import createParser from "./utils/create-parser.js";
 import replaceHashbang from "./utils/replace-hashbang.js";
-import postprocess from "./postprocess/index.js";
 
 /** @type {import("@typescript-eslint/typescript-estree").TSESTreeOptions} */
 const baseParseOptions = {
@@ -16,7 +17,8 @@ const baseParseOptions = {
   comment: true,
   tokens: true,
   loggerFn: false,
-  project: [],
+  project: false,
+  jsDocParsingMode: "none",
   // TODO: Use new properties when update printer
   suppressDeprecatedPropertyWarnings: true,
 };

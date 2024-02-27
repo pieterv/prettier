@@ -28,10 +28,15 @@ pnpm add --save-dev --save-exact prettier
 
 Then, create an empty config file to let editors and other tools know you are using Prettier:
 
-<!-- Note: `echo "{}" > .prettierrc.json` would result in `"{}"<SPACE>` on Windows. The below version works in cmd.exe, bash, zsh, fish. -->
+<!--
+Note:
+- `echo "{}" > .prettierrc` would result in `"{}"<SPACE>` on Windows.
+- `echo {}> .prettierrc` would result the file in UTF-16LE encoding in PowerShell.
+The below version works in cmd.exe, bash, zsh, fish, PowerShell.
+-->
 
 ```bash
-echo {}> .prettierrc.json
+node --eval "fs.writeFileSync('.prettierrc','{}\n')"
 ```
 
 Next, create a [.prettierignore](ignore.md) file to let the Prettier CLI and editors know which files to _not_ format. Here’s an example:
@@ -42,7 +47,7 @@ build
 coverage
 ```
 
-> Tip! Base your .prettierignore on .gitignore and .eslintignore (if you have one).
+> Tip! Prettier will follow rules specified in .gitignore if it exists in the same directory from which it is run. You can also base your .prettierignore on .eslintignore (if you have one).
 
 > Another tip! If your project isn’t ready to format, say, HTML files yet, add `*.html`.
 
@@ -116,18 +121,16 @@ For example, you can do the following to have Prettier run before each commit:
 
    ```bash
    npm install --save-dev husky lint-staged
-   npx husky install
-   npm pkg set scripts.prepare="husky install"
-   npx husky add .husky/pre-commit "npx lint-staged"
+   npx husky init
+   node --eval "fs.writeFileSync('.husky/pre-commit','npx lint-staged\n')"
    ```
 
    <!--yarn-->
 
    ```bash
    yarn add --dev husky lint-staged
-   npx husky install
-   npm pkg set scripts.prepare="husky install"
-   npx husky add .husky/pre-commit "npx lint-staged"
+   npx husky init
+   node --eval "fs.writeFileSync('.husky/pre-commit','npx lint-staged\n')"
    ```
 
    > If you use Yarn 2, see https://typicode.github.io/husky/#/?id=yarn-2
@@ -136,9 +139,8 @@ For example, you can do the following to have Prettier run before each commit:
 
    ```bash
    pnpm add --save-dev husky lint-staged
-   pnpm exec husky install
-   npm pkg set scripts.prepare="husky install"
-   pnpm exec husky add .husky/pre-commit "pnpm exec lint-staged"
+   npx husky init
+   node --eval "fs.writeFileSync('.husky/pre-commit','pnpm exec lint-staged\n')"
    ```
 
    <!--END_DOCUSAURUS_CODE_TABS-->
@@ -162,7 +164,7 @@ See [Pre-commit Hook](precommit.md) for more information.
 To summarize, we have learned to:
 
 - Install an exact version of Prettier locally in your project. This makes sure that everyone in the project gets the exact same version of Prettier. Even a patch release of Prettier can result in slightly different formatting, so you wouldn’t want different team members using different versions and formatting each other’s changes back and forth.
-- Add a `.prettierrc.json` to let your editor know that you are using Prettier.
+- Add a `.prettierrc` to let your editor know that you are using Prettier.
 - Add a `.prettierignore` to let your editor know which files _not_ to touch, as well as for being able to run `prettier --write .` to format the entire project (without mangling files you don’t want, or choking on generated files).
 - Run `prettier --check .` in CI to make sure that your project stays formatted.
 - Run Prettier from your editor for the best experience.

@@ -126,13 +126,13 @@ function printTypeScriptAccessibilityToken(node) {
 }
 
 export {
-  printOptionalToken,
-  printDefiniteToken,
-  printDeclareToken,
-  printAbstractToken,
-  printFunctionTypeParameters,
-  printBindExpressionCallee,
-  printRestSpread,
   adjustClause,
+  printAbstractToken,
+  printBindExpressionCallee,
+  printDeclareToken,
+  printDefiniteToken,
+  printFunctionTypeParameters,
+  printOptionalToken,
+  printRestSpread,
   printTypeScriptAccessibilityToken,
 };

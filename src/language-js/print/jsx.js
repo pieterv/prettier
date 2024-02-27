@@ -1,38 +1,38 @@
 import {
+  conditionalGroup,
+  cursor,
+  fill,
+  group,
+  hardline,
+  ifBreak,
+  indent,
+  join,
+  line,
+  lineSuffixBoundary,
+  softline,
+} from "../../document/builders.js";
+import { replaceEndOfLine, willBreak } from "../../document/utils.js";
+import {
   printComments,
   printDanglingComments,
 } from "../../main/comments/print.js";
-import {
-  line,
-  hardline,
-  softline,
-  group,
-  indent,
-  conditionalGroup,
-  fill,
-  ifBreak,
-  lineSuffixBoundary,
-  join,
-  cursor,
-} from "../../document/builders.js";
-import { willBreak, replaceEndOfLine } from "../../document/utils.js";
-import UnexpectedNodeError from "../../utils/unexpected-node-error.js";
 import getPreferredQuote from "../../utils/get-preferred-quote.js";
+import UnexpectedNodeError from "../../utils/unexpected-node-error.js";
 import WhitespaceUtils from "../../utils/whitespace-utils.js";
+import { willPrintOwnComments } from "../comments/printer-methods.js";
+import pathNeedsParens from "../needs-parens.js";
 import {
-  isJsxElement,
-  rawText,
-  isCallExpression,
-  isStringLiteral,
-  isBinaryish,
-  hasComment,
   CommentCheckFlags,
+  hasComment,
   hasNodeIgnoreComment,
   isArrayOrTupleExpression,
+  isBinaryish,
+  isCallExpression,
+  isJsxElement,
   isObjectOrRecordExpression,
+  isStringLiteral,
+  rawText,
 } from "../utils/index.js";
-import pathNeedsParens from "../needs-parens.js";
-import { willPrintOwnComments } from "../comments/printer-methods.js";
 
 /*
 Only the following are treated as whitespace inside JSX.
@@ -556,17 +556,23 @@ function printJsxOpeningElement(path, options, print) {
   const { node } = path;
 
   const nameHasComments =
-    hasComment(node.name) || hasComment(node.typeParameters);
+    hasComment(node.name) ||
+    hasComment(node.typeParameters) ||
+    hasComment(node.typeArguments);
 
   // Don't break self-closing elements with no attributes and no comments
   if (node.selfClosing && node.attributes.length === 0 && !nameHasComments) {
-    return ["<", print("name"), print("typeParameters"), " />"];
+    return [
+      "<",
+      print("name"),
+      node.typeArguments ? print("typeArguments") : print("typeParameters"),
+      " />",
+    ];
   }
 
   // don't break up opening elements with a single long text attribute
   if (
     node.attributes?.length === 1 &&
-    node.attributes[0].value &&
     isStringLiteral(node.attributes[0].value) &&
     !node.attributes[0].value.value.includes("\n") &&
     // We should break for the following cases:
@@ -584,7 +590,7 @@ function printJsxOpeningElement(path, options, print) {
     return group([
       "<",
       print("name"),
-      print("typeParameters"),
+      node.typeArguments ? print("typeArguments") : print("typeParameters"),
       " ",
       ...path.map(print, "attributes"),
       node.selfClosing ? " />" : ">",
@@ -594,10 +600,7 @@ function printJsxOpeningElement(path, options, print) {
   // We should print the opening element expanded if any prop value is a
   // string literal with newlines
   const shouldBreak = node.attributes?.some(
-    (attr) =>
-      attr.value &&
-      isStringLiteral(attr.value) &&
-      attr.value.value.includes("\n"),
+    (attr) => isStringLiteral(attr.value) && attr.value.value.includes("\n"),
   );
 
   const attributeLine =
@@ -609,7 +612,7 @@ function printJsxOpeningElement(path, options, print) {
     [
       "<",
       print("name"),
-      print("typeParameters"),
+      node.typeArguments ? print("typeArguments") : print("typeParameters"),
       indent(path.map(() => [attributeLine, print()], "attributes")),
       ...printEndOfOpeningTag(node, options, nameHasComments),
     ],
@@ -690,8 +693,8 @@ function printJsxOpeningClosingFragment(path, options /*, print*/) {
       hasOwnLineComment
         ? hardline
         : nodeHasComment && !isOpeningFragment
-        ? " "
-        : "",
+          ? " "
+          : "",
       printDanglingComments(path, options),
     ]),
     hasOwnLineComment ? hardline : "",
@@ -835,7 +838,6 @@ function hasJsxIgnoreComment(path) {
     return false;
   }
 
-  // TODO: Use `Array#findLast` when we drop support for Node.js<18
   // Lookup the previous sibling, ignoring any empty JSXText elements
   const { index, siblings } = path;
   let prevSibling;

@@ -1,4 +1,4 @@
-run_spec(import.meta, ["babel", "flow", "typescript"], {
+runFormatTest(import.meta, ["babel", "flow", "typescript"], {
   errors: {
     flow: [
       "for-await-using-of-comments.js",
@@ -31,9 +31,6 @@ run_spec(import.meta, ["babel", "flow", "typescript"], {
       "valid-for-using-declaration.js",
       "valid-await-using-comments.js",
       "using-declarations.js",
-
-      // https://github.com/microsoft/TypeScript/issues/55555
-      "valid-for-using-binding-of-of.js",
 
       // TypeScript does not support module expr
       "valid-module-block-top-level-using-binding.js",

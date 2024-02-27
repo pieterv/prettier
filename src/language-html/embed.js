@@ -6,23 +6,32 @@ import {
   line,
 } from "../document/builders.js";
 import printFrontMatter from "../utils/front-matter/print.js";
+import printAngularControlFlowBlockParameters from "./embed/angular-control-flow-block-parameters.js";
+import printAttribute from "./embed/attribute.js";
+import getNodeContent from "./get-node-content.js";
 import {
+  needsToBorrowPrevClosingTagEndMarker,
   printClosingTag,
   printClosingTagSuffix,
-  needsToBorrowPrevClosingTagEndMarker,
-  printOpeningTagPrefix,
   printOpeningTag,
+  printOpeningTagPrefix,
 } from "./print/tag.js";
 import {
+  dedentString,
+  htmlTrimPreserveIndentation,
+  inferElementParser,
   isScriptLikeTag,
   isVueNonHtmlBlock,
-  inferElementParser,
-  htmlTrimPreserveIndentation,
-  dedentString,
 } from "./utils/index.js";
 import isVueSfcWithTypescriptScript from "./utils/is-vue-sfc-with-typescript-script.js";
-import getNodeContent from "./get-node-content.js";
-import printAttribute from "./embed/attribute.js";
+
+const embeddedAngularControlFlowBlocks = new Set([
+  "if",
+  "else if",
+  "for",
+  "switch",
+  "case",
+]);
 
 function embed(path, options) {
   const { node } = path;
@@ -92,9 +101,7 @@ function embed(path, options) {
             return [
               breakParent,
               printOpeningTagPrefix(node, options),
-              textToDoc(value, textToDocOptions, {
-                stripTrailingHardline: true,
-              }),
+              textToDoc(value, textToDocOptions),
               printClosingTagSuffix(node, options),
             ];
           };
@@ -135,6 +142,13 @@ function embed(path, options) {
 
     case "front-matter":
       return (textToDoc) => printFrontMatter(node, textToDoc);
+
+    case "angularControlFlowBlockParameters":
+      if (!embeddedAngularControlFlowBlocks.has(path.parent.name)) {
+        return;
+      }
+
+      return printAngularControlFlowBlockParameters;
   }
 }
 

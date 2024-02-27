@@ -1,10 +1,11 @@
 import { parse as babelParse, parseExpression } from "@babel/parser";
+
+import getNextNonSpaceNonCommentCharacterIndex from "../../utils/get-next-non-space-non-comment-character-index.js";
 import tryCombinations from "../../utils/try-combinations.js";
 import getShebang from "../utils/get-shebang.js";
-import getNextNonSpaceNonCommentCharacterIndex from "../../utils/get-next-non-space-non-comment-character-index.js";
-import createParser from "./utils/create-parser.js";
-import createBabelParseError from "./utils/create-babel-parse-error.js";
 import postprocess from "./postprocess/index.js";
+import createBabelParseError from "./utils/create-babel-parse-error.js";
+import createParser from "./utils/create-parser.js";
 import getSourceType from "./utils/get-source-type.js";
 import wrapBabelExpression from "./utils/wrap-babel-expression.js";
 
@@ -26,6 +27,7 @@ const parseOptions = {
   allowUndeclaredExports: true,
   errorRecovery: true,
   createParenthesizedExpressions: true,
+  createImportExpressions: true,
   plugins: [
     // When adding a plugin, please add a test in `tests/format/js/babel-plugins`,
     // To remove plugins, remove it here and run `yarn test tests/format/js/babel-plugins` to verify
@@ -45,6 +47,9 @@ const parseOptions = {
     "importReflection",
     "explicitResourceManagement",
     ["importAttributes", { deprecatedAssertSyntax: true }],
+    "sourcePhaseImports",
+    "deferredImportEvaluation",
+    ["optionalChainingAssign", { version: "2023-07" }],
   ],
   tokens: true,
   ranges: true,
@@ -94,7 +99,7 @@ function isFlowFile(text, options) {
 function parseWithOptions(parse, text, options) {
   const ast = parse(text, options);
   const error = ast.errors.find(
-    (error) => !allowedMessageCodes.has(error.reasonCode),
+    (error) => !allowedReasonCodes.has(error.reasonCode),
   );
   if (error) {
     throw error;
@@ -166,11 +171,11 @@ function createParse({ isExpression = false, optionsCombinations }) {
 }
 
 // Error codes are defined in
-//  - https://github.com/babel/babel/blob/v7.14.0/packages/babel-parser/src/parser/error-message.js
-//  - https://github.com/babel/babel/blob/v7.14.0/packages/babel-parser/src/plugins/typescript/index.js#L69-L153
-//  - https://github.com/babel/babel/blob/v7.14.0/packages/babel-parser/src/plugins/flow/index.js#L51-L140
-//  - https://github.com/babel/babel/blob/v7.14.0/packages/babel-parser/src/plugins/jsx/index.js#L23-L39
-const allowedMessageCodes = new Set([
+//  - https://github.com/babel/babel/tree/v7.23.6/packages/babel-parser/src/parse-error
+//  - https://github.com/babel/babel/blob/v7.23.6/packages/babel-parser/src/plugins/typescript/index.ts#L73-L223
+//  - https://github.com/babel/babel/blob/v7.23.6/packages/babel-parser/src/plugins/flow/index.ts#L47-L224
+//  - https://github.com/babel/babel/blob/v7.23.6/packages/babel-parser/src/plugins/jsx/index.ts#L23-L44
+const allowedReasonCodes = new Set([
   "StrictNumericEscape",
   "StrictWith",
   "StrictOctalLiteral",
@@ -184,10 +189,6 @@ const allowedMessageCodes = new Set([
   "ConstructorHasTypeParameters",
 
   "UnsupportedParameterPropertyKind",
-
-  "MixedLabeledAndUnlabeledElements",
-
-  "DuplicateAccessibilityModifier",
 
   "DecoratorExportClass",
   "ParamDupe",

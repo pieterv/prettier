@@ -1,18 +1,24 @@
 import fs from "node:fs";
 
+import { isUrlString } from "url-or-path";
+
 /**
- * @param {string} filename
+ * @param {string | URL} file
  * @returns {Promise<undefined | string>}
  */
-function readFile(filename) {
+function readFile(file) {
+  if (isUrlString(file)) {
+    file = new URL(file);
+  }
+
   try {
-    return fs.readFileSync(filename, "utf8");
+    return fs.readFileSync(file, "utf8");
   } catch (/** @type {any} */ error) {
     if (error.code === "ENOENT") {
       return;
     }
 
-    throw new Error(`Unable to read '${filename}': ${error.message}`);
+    throw new Error(`Unable to read '${file}': ${error.message}`);
   }
 }
 

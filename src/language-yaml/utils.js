@@ -182,10 +182,10 @@ function getFlowScalarLineContents(nodeType, content, options) {
       index === 0 && index === lineContents.length - 1
         ? lineContent
         : index !== 0 && index !== lineContents.length - 1
-        ? lineContent.trim()
-        : index === 0
-        ? lineContent.trimEnd()
-        : lineContent.trimStart(),
+          ? lineContent.trim()
+          : index === 0
+            ? lineContent.trimEnd()
+            : lineContent.trimStart(),
     );
 
   if (options.proseWrap === "preserve") {
@@ -307,9 +307,9 @@ function getBlockValueLineContents(
     return trailingNewlineCount === 0
       ? lineContents
       : trailingNewlineCount >= 2 && !isLastDescendant
-      ? // next empty line
-        lineContents.slice(0, -(trailingNewlineCount - 1))
-      : lineContents.slice(0, -trailingNewlineCount);
+        ? // next empty line
+          lineContents.slice(0, -(trailingNewlineCount - 1))
+        : lineContents.slice(0, -trailingNewlineCount);
   }
 }
 
@@ -333,20 +333,20 @@ function isInlineNode(node) {
 }
 
 export {
-  isNode,
-  isEmptyNode,
-  isInlineNode,
-  mapNode,
   defineShortcut,
-  isNextLineEmpty,
-  isLastDescendantNode,
   getBlockValueLineContents,
   getFlowScalarLineContents,
   getLastDescendantNode,
-  hasPrettierIgnore,
+  hasEndComments,
+  hasIndicatorComment,
   hasLeadingComments,
   hasMiddleComments,
-  hasIndicatorComment,
+  hasPrettierIgnore,
   hasTrailingComment,
-  hasEndComments,
+  isEmptyNode,
+  isInlineNode,
+  isLastDescendantNode,
+  isNextLineEmpty,
+  isNode,
+  mapNode,
 };

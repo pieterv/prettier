@@ -1,6 +1,7 @@
 import { VISITOR_KEYS as babelVisitorKeys } from "@babel/types";
 import { visitorKeys as tsVisitorKeys } from "@typescript-eslint/visitor-keys";
 import flowVisitorKeys from "hermes-parser/dist/generated/ESTreeVisitorKeys.js";
+
 import unionVisitorKeys from "./union-visitor-keys.js";
 
 const angularVisitorKeys = {
@@ -43,12 +44,12 @@ const additionalVisitorKeys = {
   AsExpression: ["expression", "typeAnnotation"],
   AsConstExpression: ["expression"],
   SatisfiesExpression: ["expression", "typeAnnotation"],
+  TypeofTypeAnnotation: ["argument", "typeArguments"],
 };
 
 const excludeKeys = {
   // From `tsVisitorKeys`
   MethodDefinition: ["typeParameters"],
-  TSPropertySignature: ["initializer"],
 
   // From `flowVisitorKeys`
   ArrowFunctionExpression: ["id"],
@@ -61,9 +62,10 @@ const excludeKeys = {
   // TupleTypeAnnotation: ["types"],
   PropertyDefinition: ["tsModifiers"],
 
-  // From `babelVisitorKeys`
-  DeclareInterface: ["mixins", "implements"],
-  InterfaceDeclaration: ["mixins", "implements"],
+  // Legacy property
+  ExportAllDeclaration: ["assertions"],
+  ExportNamedDeclaration: ["assertions"],
+  ImportDeclaration: ["assertions"],
 };
 
 const visitorKeys = Object.fromEntries(

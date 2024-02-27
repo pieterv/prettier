@@ -1,4 +1,4 @@
-import { join, group } from "../../document/builders.js";
+import { group, join } from "../../document/builders.js";
 import pathNeedsParens from "../needs-parens.js";
 import {
   getCallArguments,
@@ -9,9 +9,9 @@ import {
   isTestCall,
   iterateCallArgumentsPath,
 } from "../utils/index.js";
-import printMemberChain from "./member-chain.js";
 import printCallArguments from "./call-arguments.js";
-import { printOptionalToken, printFunctionTypeParameters } from "./misc.js";
+import printMemberChain from "./member-chain.js";
+import { printFunctionTypeParameters, printOptionalToken } from "./misc.js";
 
 function printCallExpression(path, options, print) {
   const { node, parent } = path;
@@ -61,14 +61,18 @@ function printCallExpression(path, options, print) {
     !isDynamicImport &&
     !isNew &&
     isMemberish(node.callee) &&
-    !path.call((path) => pathNeedsParens(path, options), "callee")
+    !path.call(
+      (path) => pathNeedsParens(path, options),
+      "callee",
+      ...(node.callee.type === "ChainExpression" ? ["expression"] : []),
+    )
   ) {
     return printMemberChain(path, options, print);
   }
 
   const contents = [
     isNew ? "new " : "",
-    isDynamicImport ? "import" : print("callee"),
+    isDynamicImport ? printDynamicImportCallee(node) : print("callee"),
     optional,
     printFunctionTypeParameters(path, options, print),
     printCallArguments(path, options, print),
@@ -81,6 +85,13 @@ function printCallExpression(path, options, print) {
   }
 
   return contents;
+}
+
+function printDynamicImportCallee(node) {
+  if (!node.phase) {
+    return "import";
+  }
+  return `import.${node.phase}`;
 }
 
 function isCommonsJsOrAmdCall(node, parentNode) {

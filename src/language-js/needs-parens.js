@@ -1,20 +1,20 @@
 import isNonEmptyArray from "../utils/is-non-empty-array.js";
 import {
+  createTypeCheckFunction,
   getFunctionParameters,
   getLeftSidePathName,
+  getPrecedence,
   hasNakedLeftSide,
   hasNode,
+  isArrayOrTupleExpression,
+  isBinaryCastExpression,
   isBitwiseOperator,
-  startsWithNoLookaheadToken,
-  shouldFlatten,
-  getPrecedence,
   isCallExpression,
   isMemberExpression,
-  isObjectProperty,
-  isBinaryCastExpression,
-  isArrayOrTupleExpression,
   isObjectOrRecordExpression,
-  createTypeCheckFunction,
+  isObjectProperty,
+  shouldFlatten,
+  startsWithNoLookaheadToken,
 } from "./utils/index.js";
 
 function needsParens(path, options) {
@@ -95,10 +95,10 @@ function needsParens(path, options) {
       const expression = !statement
         ? undefined
         : statement.type === "ExpressionStatement"
-        ? statement.expression
-        : statement.type === "ForStatement"
-        ? statement.init
-        : statement.left;
+          ? statement.expression
+          : statement.type === "ForStatement"
+            ? statement.init
+            : statement.left;
       if (
         expression &&
         startsWithNoLookaheadToken(
@@ -262,6 +262,19 @@ function needsParens(path, options) {
             key === "returnType" && node.type === "ArrowFunctionExpression",
         ) &&
         includesFunctionTypeInObjectType(node)
+      ) {
+        return true;
+      }
+      break;
+
+    // A user typing `!foo instanceof Bar` probably intended
+    // `!(foo instanceof Bar)`, so format to `(!foo) instance Bar` to what is
+    // really happening
+    case "BinaryExpression":
+      if (
+        key === "left" &&
+        (parent.operator === "in" || parent.operator === "instanceof") &&
+        node.type === "UnaryExpression"
       ) {
         return true;
       }
@@ -556,8 +569,20 @@ function needsParens(path, options) {
       }
     // fallthrough
     case "TSInferType":
-      if (node.type === "TSInferType" && parent.type === "TSRestType") {
-        return false;
+      if (node.type === "TSInferType") {
+        if (parent.type === "TSRestType") {
+          return false;
+        }
+
+        if (
+          key === "types" &&
+          (parent.type === "TSUnionType" ||
+            parent.type === "TSIntersectionType") &&
+          node.typeParameter.type === "TSTypeParameter" &&
+          node.typeParameter.constraint
+        ) {
+          return true;
+        }
       }
     // fallthrough
     case "TSTypeOperator":
@@ -810,7 +835,11 @@ function needsParens(path, options) {
           return key === "callee";
 
         case "ConditionalExpression":
-          return key === "test";
+          // TODO remove this case entirely once we've removed this flag.
+          if (!options.experimentalTernaries) {
+            return key === "test";
+          }
+          return false;
 
         case "MemberExpression":
         case "OptionalMemberExpression":
@@ -997,6 +1026,7 @@ const isStatement = createTypeCheckFunction([
   "DeclareInterface",
   "DeclareModule",
   "DeclareModuleExports",
+  "DeclareNamespace",
   "DeclareVariable",
   "DeclareEnum",
   "DoWhileStatement",

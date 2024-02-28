@@ -1,11 +1,12 @@
 import assert from "node:assert";
+
+import { getChildren } from "../../utils/ast-utils.js";
 import hasNewline from "../../utils/has-newline.js";
 import isNonEmptyArray from "../../utils/is-non-empty-array.js";
-import { getChildren } from "../../utils/ast-utils.js";
 import createGetVisitorKeysFunction from "../create-get-visitor-keys-function.js";
 import {
-  addLeadingComment,
   addDanglingComment,
+  addLeadingComment,
   addTrailingComment,
 } from "./utils.js";
 
@@ -183,6 +184,7 @@ function attachComments(ast, options) {
     if (
       options.parser === "json" ||
       options.parser === "json5" ||
+      options.parser === "jsonc" ||
       options.parser === "__js_expression" ||
       options.parser === "__ts_expression" ||
       options.parser === "__vue_expression" ||

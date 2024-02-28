@@ -1,9 +1,10 @@
 import { outdent } from "outdent";
+
 import {
   CATEGORY_CONFIG,
   CATEGORY_EDITOR,
-  CATEGORY_OTHER,
   CATEGORY_GLOBAL,
+  CATEGORY_OTHER,
   CATEGORY_SPECIAL,
 } from "./option-categories.js";
 
@@ -16,7 +17,7 @@ import {
  * @property {OptionRangeInfo} [range] - for type int
  * @property {string} description
  * @property {string} [deprecated] - deprecated since version
- * @property {OptionRedirectInfo} [redirect] - redirect deprecated option
+ * @property {OptionRedirectInfo | string} [redirect] - redirect deprecated option
  * @property {(value: any) => boolean} [exception]
  * @property {OptionChoiceInfo[]} [choices] - for type choice
  * @property {string} [cliName]
@@ -49,10 +50,8 @@ const options = {
     type: "int",
     default: -1,
     range: { start: -1, end: Number.POSITIVE_INFINITY, step: 1 },
-    description: outdent`
-      Print (to stderr) where a cursor at the given position would move to after formatting.
-      This option cannot be used with --range-start and --range-end.
-    `,
+    description:
+      "Print (to stderr) where a cursor at the given position would move to after formatting.",
     cliCategory: CATEGORY_EDITOR,
   },
   endOfLine: {
@@ -121,6 +120,7 @@ const options = {
       { value: "scss", description: "SCSS" },
       { value: "json", description: "JSON" },
       { value: "json5", description: "JSON5" },
+      { value: "jsonc", description: "JSON with Comments" },
       { value: "json-stringify", description: "JSON.stringify" },
       { value: "graphql", description: "GraphQL" },
       { value: "markdown", description: "Markdown" },
@@ -160,7 +160,6 @@ const options = {
     description: outdent`
       Format code ending at a given character offset (exclusive).
       The range will extend forwards to the end of the selected statement.
-      This option cannot be used with --cursor-offset.
     `,
     cliCategory: CATEGORY_EDITOR,
   },
@@ -172,7 +171,6 @@ const options = {
     description: outdent`
       Format code starting at a given character offset.
       The range will extend backwards to the start of the first line containing the selected statement.
-      This option cannot be used with --cursor-offset.
     `,
     cliCategory: CATEGORY_EDITOR,
   },

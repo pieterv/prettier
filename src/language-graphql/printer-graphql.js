@@ -1,18 +1,18 @@
 import {
-  join,
+  group,
   hardline,
+  ifBreak,
+  indent,
+  join,
   line,
   softline,
-  group,
-  indent,
-  ifBreak,
 } from "../document/builders.js";
 import isNextLineEmpty from "../utils/is-next-line-empty.js";
 import isNonEmptyArray from "../utils/is-non-empty-array.js";
 import UnexpectedNodeError from "../utils/unexpected-node-error.js";
-import { insertPragma } from "./pragma.js";
-import { locStart, locEnd } from "./loc.js";
 import getVisitorKeys from "./get-visitor-keys.js";
+import { locEnd, locStart } from "./loc.js";
+import { insertPragma } from "./pragma.js";
 import printDescription from "./print/description.js";
 
 function genericPrint(path, options, print) {
@@ -384,7 +384,7 @@ function genericPrint(path, options, print) {
                 " =",
                 ifBreak("", " "),
                 indent([
-                  ifBreak([line, "  "]),
+                  ifBreak([line, "| "]),
                   join([line, "| "], path.map(print, "types")),
                 ]),
               ]
@@ -500,11 +500,15 @@ function printVariableDefinitions(path, print) {
   ]);
 }
 
-function clean(node, newNode /* , parent */) {
+function clean(original, cloned /* , parent */) {
   // We print single line `""" string """` as multiple line string,
   // and the parser ignores space in multiple line string
-  if (node.kind === "StringValue" && node.block && !node.value.includes("\n")) {
-    newNode.value = newNode.value.trim();
+  if (
+    original.kind === "StringValue" &&
+    original.block &&
+    !original.value.includes("\n")
+  ) {
+    cloned.value = original.value.trim();
   }
 }
 clean.ignoredProperties = new Set(["loc", "comments"]);

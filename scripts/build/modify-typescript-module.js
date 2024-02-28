@@ -1,8 +1,10 @@
 import path from "node:path";
+
 import escapeStringRegexp from "escape-string-regexp";
-import { outdent } from "outdent";
 import MagicString from "magic-string";
-import { writeFile, PROJECT_ROOT } from "../utils/index.js";
+import { outdent } from "outdent";
+
+import { PROJECT_ROOT, writeFile } from "../utils/index.js";
 
 function* getModules(text) {
   const parts = text.split(/(?<=\n)( {2}\/\/ src\/\S+\n)/);
@@ -198,6 +200,13 @@ function modifyTypescriptModule(text) {
     }
   }
 
+  // server
+  for (const module of source.modules) {
+    if (module.path.startsWith("src/server/")) {
+      source.removeModule(module);
+    }
+  }
+
   // `transformers`
   source.removeModule("src/compiler/transformer.ts");
   for (const module of source.modules) {
@@ -267,6 +276,9 @@ function modifyTypescriptModule(text) {
       var createNodeConverters = () => new Proxy({}, {get: () => () => {}});
     `,
   );
+
+  // `pnp`
+  source.removeModule("src/compiler/pnp.ts");
 
   /* spell-checker: disable */
   // `ts.createParenthesizerRules`

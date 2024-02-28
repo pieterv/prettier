@@ -14,7 +14,7 @@ import { formatAttributeValue } from "./utils.js";
  *     v-for="(..., ...) of ..."
  *
  * @param {*} options
- * @returns {Promise<Doc>}
+ * @returns {Doc}
  */
 function printVueVForDirective(textToDoc, print, path, options) {
   const value = getUnescapedAttributeValue(path.node);

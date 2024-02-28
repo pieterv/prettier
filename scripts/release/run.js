@@ -1,7 +1,8 @@
 import semver from "semver";
-import { runGit, readJson, logPromise } from "./utils.js";
+
 import parseArguments from "./parse-arguments.js";
 import * as steps from "./steps/index.js";
+import { logPromise, readJson, runGit } from "./utils.js";
 
 const params = parseArguments();
 const { stdout: previousVersion } = await runGit([
@@ -54,6 +55,11 @@ for (let step of [
   steps.showInstructionsAfterNpmPublish,
   steps.updateDependentsCount,
   steps.bumpPrettier,
+  {
+    name: "Cleaning changelog",
+    process: steps.cleanChangelog,
+    skip: params.dry || params.next,
+  },
   steps.postPublishSteps,
 ]) {
   if (typeof step === "function") {

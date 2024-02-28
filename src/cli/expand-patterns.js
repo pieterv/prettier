@@ -1,6 +1,7 @@
 import path from "node:path";
-import { lstatSafe, normalizeToPosix } from "./utils.js";
+
 import { fastGlob } from "./prettier-internal.js";
+import { lstatSafe, normalizeToPosix } from "./utils.js";
 
 /** @typedef {import('./context').Context} Context */
 
@@ -11,22 +12,24 @@ async function* expandPatterns(context) {
   const seen = new Set();
   let noResults = true;
 
-  for await (const pathOrError of expandPatternsInternal(context)) {
+  for await (const { filePath, ignoreUnknown, error } of expandPatternsInternal(
+    context,
+  )) {
     noResults = false;
-    if (typeof pathOrError !== "string") {
-      yield pathOrError;
+    if (error) {
+      yield { error };
       continue;
     }
 
-    const fileName = path.resolve(pathOrError);
+    const filename = path.resolve(filePath);
 
     // filter out duplicates
-    if (seen.has(fileName)) {
+    if (seen.has(filename)) {
       continue;
     }
 
-    seen.add(fileName);
-    yield fileName;
+    seen.add(filename);
+    yield { filename, ignoreUnknown };
   }
 
   if (noResults && context.argv.errorOnUnmatchedPattern !== false) {
@@ -52,7 +55,6 @@ async function* expandPatternsInternal(context) {
     followSymbolicLinks: false,
   };
 
-  let supportedFilesGlob;
   const cwd = process.cwd();
 
   /** @type {Array<{ type: 'file' | 'dir' | 'glob'; glob: string; input: string; }>} */
@@ -68,9 +70,15 @@ async function* expandPatternsInternal(context) {
     const stat = await lstatSafe(absolutePath);
     if (stat) {
       if (stat.isSymbolicLink()) {
-        yield {
-          error: `Explicitly specified pattern "${pattern}" is a symbolic link.`,
-        };
+        if (context.argv.errorOnUnmatchedPattern !== false) {
+          yield {
+            error: `Explicitly specified pattern "${pattern}" is a symbolic link.`,
+          };
+        } else {
+          context.logger.debug(
+            `Skipping pattern "${pattern}", as it is a symbolic link.`,
+          );
+        }
       } else if (stat.isFile()) {
         entries.push({
           type: "file",
@@ -87,10 +95,9 @@ async function* expandPatternsInternal(context) {
         const prefix = escapePathForGlob(fixWindowsSlashes(relativePath));
         entries.push({
           type: "dir",
-          glob: getSupportedFilesGlob().map(
-            (pattern) => `${prefix}/**/${pattern}`,
-          ),
+          glob: `${prefix}/**/*`,
           input: pattern,
+          ignoreUnknown: true,
         });
       }
     } else if (pattern[0] === "!") {
@@ -105,7 +112,7 @@ async function* expandPatternsInternal(context) {
     }
   }
 
-  for (const { type, glob, input } of entries) {
+  for (const { type, glob, input, ignoreUnknown } of entries) {
     let result;
 
     try {
@@ -123,22 +130,7 @@ async function* expandPatternsInternal(context) {
         yield { error: `${errorMessages.emptyResults[type]}: "${input}".` };
       }
     } else {
-      yield* sortPaths(result);
-    }
-  }
-
-  function getSupportedFilesGlob() {
-    supportedFilesGlob ??= [...getSupportedFilesGlobWithoutCache()];
-    return supportedFilesGlob;
-  }
-
-  function* getSupportedFilesGlobWithoutCache() {
-    for (const { extensions = [], filenames = [] } of context.languages) {
-      yield* filenames;
-
-      for (const extension of extensions) {
-        yield `*${extension.startsWith(".") ? extension : `.${extension}`}`;
-      }
+      yield* sortPaths(result).map((filePath) => ({ filePath, ignoreUnknown }));
     }
   }
 }

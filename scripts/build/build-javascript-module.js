@@ -1,22 +1,23 @@
-import path from "node:path";
 import { createRequire } from "node:module";
-import createEsmUtils from "esm-utils";
+import path from "node:path";
+
+import browserslistToEsbuild from "browserslist-to-esbuild";
 import esbuild from "esbuild";
 import { nodeModulesPolyfillPlugin as esbuildPluginNodeModulePolyfills } from "esbuild-plugins-node-modules-polyfill";
-import browserslistToEsbuild from "browserslist-to-esbuild";
-import { PROJECT_ROOT, DIST_DIR } from "../utils/index.js";
+import createEsmUtils from "esm-utils";
+
+import { DIST_DIR, PROJECT_ROOT } from "../utils/index.js";
+import esbuildPluginAddDefaultExport from "./esbuild-plugins/add-default-export.js";
 import esbuildPluginEvaluate from "./esbuild-plugins/evaluate.js";
-import esbuildPluginReplaceModule from "./esbuild-plugins/replace-module.js";
 import esbuildPluginLicense from "./esbuild-plugins/license.js";
-import esbuildPluginUmd from "./esbuild-plugins/umd.js";
-import esbuildPluginVisualizer from "./esbuild-plugins/visualizer.js";
+import esbuildPluginPrimitiveDefine from "./esbuild-plugins/primitive-define.js";
+import esbuildPluginReplaceModule from "./esbuild-plugins/replace-module.js";
+import esbuildPluginShimCommonjsObjects from "./esbuild-plugins/shim-commonjs-objects.js";
 import esbuildPluginStripNodeProtocol from "./esbuild-plugins/strip-node-protocol.js";
 import esbuildPluginThrowWarnings from "./esbuild-plugins/throw-warnings.js";
-import esbuildPluginShimCommonjsObjects from "./esbuild-plugins/shim-commonjs-objects.js";
-import esbuildPluginPrimitiveDefine from "./esbuild-plugins/primitive-define.js";
-import esbuildPluginAddDefaultExport from "./esbuild-plugins/add-default-export.js";
+import esbuildPluginUmd from "./esbuild-plugins/umd.js";
+import esbuildPluginVisualizer from "./esbuild-plugins/visualizer.js";
 import transform from "./transform/index.js";
-import transformEastAsianWidthModule from "./transform/eastasianwidth-module.js";
 import { getPackageFile } from "./utils.js";
 
 const { dirname, readJsonSync, require } = createEsmUtils(import.meta);
@@ -91,11 +92,6 @@ function getEsbuildOptions({ file, files, shouldCollectLicenses, cliOptions }) {
           )
           .replace(/\nfunction _os\(\).*?\n}/s, "")
           .replace(/\nfunction _detectNewline\(\).*?\n}/s, ""),
-    },
-    // Reduce size
-    {
-      module: require.resolve("eastasianwidth"),
-      process: transformEastAsianWidthModule,
     },
   ];
 

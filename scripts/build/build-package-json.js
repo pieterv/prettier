@@ -1,5 +1,6 @@
 import path from "node:path";
-import { PROJECT_ROOT, DIST_DIR, readJson, writeJson } from "../utils/index.js";
+
+import { DIST_DIR, PROJECT_ROOT, readJson, writeJson } from "../utils/index.js";
 
 const keysToKeep = [
   "name",
@@ -42,6 +43,10 @@ async function buildPackageJson({ file, files }) {
       ".": {
         types: "./index.d.ts",
         require: "./index.cjs",
+        browser: {
+          import: "./standalone.mjs",
+          default: "./standalone.js",
+        },
         default: "./index.mjs",
       },
       "./*": "./*",

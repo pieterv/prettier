@@ -17,8 +17,8 @@ function shouldHugJsExpression(ast, options) {
         ? ast.node.body[0].expression
         : ast.node
       : ast.type === "JsExpressionRoot"
-      ? ast.node
-      : ast;
+        ? ast.node
+        : ast;
   return (
     rootNode &&
     (rootNode.type === "ObjectExpression" ||
@@ -35,14 +35,9 @@ function shouldHugJsExpression(ast, options) {
  * @param {Function} textToDoc
  * @param {*} options
  * @param {(ast: any, options: any) => boolean} [shouldHugJsExpression]
- * @returns {Promise<Doc>}
+ * @returns {Doc}
  */
-function formatAttributeValue(
-  code,
-  textToDoc,
-  options,
-  shouldHugJsExpression,
-) {
+function formatAttributeValue(code, textToDoc, options, shouldHugJsExpression) {
   options = {
     // strictly prefer single quote to avoid unnecessary html entity escape
     __isInHtmlAttribute: true,
@@ -62,4 +57,4 @@ function formatAttributeValue(
   return shouldHug ? group(doc) : printExpand(doc);
 }
 
-export { printExpand, formatAttributeValue, shouldHugJsExpression };
+export { formatAttributeValue, printExpand, shouldHugJsExpression };

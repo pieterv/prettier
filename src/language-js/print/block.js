@@ -1,9 +1,9 @@
+import { hardline, indent } from "../../document/builders.js";
 import { printDanglingComments } from "../../main/comments/print.js";
 import isNonEmptyArray from "../../utils/is-non-empty-array.js";
-import { hardline, indent } from "../../document/builders.js";
 import {
-  hasComment,
   CommentCheckFlags,
+  hasComment,
   isNextLineEmpty,
 } from "../utils/index.js";
 import { printStatementSequence } from "./statement.js";
@@ -11,12 +11,19 @@ import { printStatementSequence } from "./statement.js";
 /** @typedef {import("../../document/builders.js").Doc} Doc */
 
 /*
+- `Program`
 - `BlockStatement`
 - `StaticBlock`
 - `TSModuleBlock` (TypeScript)
 */
 function printBlock(path, options, print) {
-  const { node } = path;
+  const bodyDoc = printBlockBody(path, options, print);
+  const { node, parent } = path;
+
+  if (node.type === "Program" && parent?.type !== "ModuleExpression") {
+    return bodyDoc ? [bodyDoc, hardline] : "";
+  }
+
   const parts = [];
 
   if (node.type === "StaticBlock") {
@@ -24,11 +31,9 @@ function printBlock(path, options, print) {
   }
 
   parts.push("{");
-  const printed = printBlockBody(path, options, print);
-  if (printed) {
-    parts.push(indent([hardline, printed]), hardline);
+  if (bodyDoc) {
+    parts.push(indent([hardline, bodyDoc]), hardline);
   } else {
-    const { parent } = path;
     const parentParent = path.grandparent;
     if (
       !(
@@ -44,6 +49,7 @@ function printBlock(path, options, print) {
         parent.type === "WhileStatement" ||
         parent.type === "DoWhileStatement" ||
         parent.type === "DoExpression" ||
+        parent.type === "ModuleExpression" ||
         (parent.type === "CatchClause" && !parentParent.finalizer) ||
         parent.type === "TSModuleDeclaration" ||
         parent.type === "TSDeclareFunction" ||
@@ -97,11 +103,7 @@ function printBlockBody(path, options, print) {
     parts.push(printDanglingComments(path, options));
   }
 
-  if (node.type === "Program" && path.parent?.type !== "ModuleExpression") {
-    parts.push(hardline);
-  }
-
   return parts;
 }
 
-export { printBlock, printBlockBody };
+export { printBlock };

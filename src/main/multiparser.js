@@ -1,7 +1,7 @@
 import { stripTrailingHardline } from "../document/utils.js";
+import createGetVisitorKeysFunction from "./create-get-visitor-keys-function.js";
 import normalizeFormatOptions from "./normalize-format-options.js";
 import parse from "./parse.js";
-import createGetVisitorKeysFunction from "./create-get-visitor-keys-function.js";
 
 function printEmbeddedLanguages(
   /** @type {import("../common/ast-path.js").default} */ path,
@@ -102,12 +102,7 @@ function printEmbeddedLanguages(
   }
 }
 
-function textToDoc(
-  text,
-  partialNextOptions,
-  parentOptions,
-  printAstToDoc,
-) {
+function textToDoc(text, partialNextOptions, parentOptions, printAstToDoc) {
   const options = normalizeFormatOptions(
     {
       ...parentOptions,

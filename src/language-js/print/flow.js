@@ -11,10 +11,20 @@ import { printArray } from "./array.js";
 import { printBinaryCastExpression } from "./cast-expression.js";
 import { printClass } from "./class.js";
 import {
+  printComponent,
+  printComponentParameter,
+  printComponentTypeParameter,
+} from "./component.js";
+import {
   printEnumBody,
   printEnumDeclaration,
   printEnumMember,
 } from "./enum.js";
+import {
+  printDeclareHook,
+  printHook,
+  printHookTypeAnnotation,
+} from "./hook.js";
 import { printInterface } from "./interface.js";
 import { printBigInt } from "./literal.js";
 import { printFlowMappedTypeProperty } from "./mapped-type.js";
@@ -27,16 +37,6 @@ import { printExportDeclaration } from "./module.js";
 import { printObject } from "./object.js";
 import { printPropertyKey } from "./property.js";
 import { printTernary } from "./ternary.js";
-import {
-  printComponent,
-  printComponentParameter,
-  printComponentTypeParameter,
-} from "./component.js";
-import {
-  printHook,
-  printDeclareHook,
-  printHookTypeAnnotation,
-} from "./hook.js";
 import {
   printArrayType,
   printFunctionType,

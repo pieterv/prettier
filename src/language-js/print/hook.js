@@ -1,10 +1,10 @@
 import { group } from "../../document/builders.js";
-import { printDeclareToken } from "./misc.js";
+import { printReturnType } from "./function.js";
 import {
   printFunctionParameters,
   shouldGroupFunctionParameters,
 } from "./function-parameters.js";
-import { printReturnType } from "./function.js";
+import { printDeclareToken } from "./misc.js";
 
 /**
  * @typedef {import("../../common/ast-path.js").default} AstPath
@@ -110,4 +110,4 @@ function printHookTypeAnnotation(path, options, print) {
   return group(parts);
 }
 
-export { printHook, printDeclareHook, printHookTypeAnnotation };
+export { printDeclareHook, printHook, printHookTypeAnnotation };

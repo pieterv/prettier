@@ -1,15 +1,15 @@
 import {
-  line,
-  hardline,
-  softline,
   group,
-  indent,
+  hardline,
   ifBreak,
+  indent,
+  line,
+  softline,
 } from "../../document/builders.js";
-import getNextNonSpaceNonCommentCharacter from "../../utils/get-next-non-space-non-comment-character.js";
 import { printDanglingComments } from "../../main/comments/print.js";
+import getNextNonSpaceNonCommentCharacter from "../../utils/get-next-non-space-non-comment-character.js";
 import { locEnd } from "../loc.js";
-import { shouldPrintComma, isNextLineEmpty } from "../utils/index.js";
+import { isNextLineEmpty,shouldPrintComma } from "../utils/index.js";
 import { printDeclareToken } from "./misc.js";
 
 /**

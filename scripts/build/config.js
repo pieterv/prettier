@@ -570,8 +570,8 @@ const universalFiles = [...nonPluginUniversalFiles, ...pluginFiles].flatMap(
 
     outputBaseName ??= path.basename(input);
 
-    return [
-      ...[
+    return ( 
+      [
         // {
         //   format: "esm",
         //   file: `${outputBaseName}${extensions.esm}`,
@@ -592,9 +592,9 @@ const universalFiles = [...nonPluginUniversalFiles, ...pluginFiles].flatMap(
         isPlugin,
         build: buildJavascriptModule,
         kind: "javascript",
-      })),
+      }))
       // getTypesFileConfig({ input, outputBaseName, isPlugin }),
-    ];
+    );
   },
 );
 

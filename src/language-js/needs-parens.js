@@ -645,7 +645,10 @@ function needsParens(path, options) {
 
     case "ComponentTypeAnnotation":
     case "FunctionTypeAnnotation": {
-      if (node.type === "ComponentTypeAnnotation" && node.rendersType == null) {
+      if (
+        node.type === "ComponentTypeAnnotation" &&
+        (node.rendersType === null || node.rendersType === undefined)
+      ) {
         return false;
       }
 

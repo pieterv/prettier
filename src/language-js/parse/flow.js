@@ -42,6 +42,7 @@ import createParser from "./utils/create-parser.js";
 // }
 
 function parse(text) {
+  void text;
   // const ast = flowParser.parse(replaceHashbang(text), parseOptions);
   // const [error] = ast.errors;
   // if (error) {

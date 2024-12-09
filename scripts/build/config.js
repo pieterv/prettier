@@ -1,22 +1,23 @@
-import fs from "node:fs";
+// import fs from "node:fs";
 import path from "node:path";
-import url from "node:url";
 
+// import url from "node:url";
 import createEsmUtils from "esm-utils";
 
-import { copyFile, DIST_DIR, PROJECT_ROOT } from "../utils/index.js";
+// import { copyFile, DIST_DIR, PROJECT_ROOT } from "../utils/index.js";
 import buildJavascriptModule from "./build-javascript-module.js";
-import buildLicense from "./build-license.js";
-import buildPackageJson from "./build-package-json.js";
-import buildTypes from "./build-types.js";
-import modifyTypescriptModule from "./modify-typescript-module.js";
+// import buildLicense from "./build-license.js";
+// import buildPackageJson from "./build-package-json.js";
+// import buildTypes from "./build-types.js";
+// import modifyTypescriptModule from "./modify-typescript-module.js";
 import { getPackageFile } from "./utils.js";
 
 const {
   require,
   dirname,
-  resolve: importMetaResolve,
+  //  resolve: importMetaResolve,
 } = createEsmUtils(import.meta);
+/*
 const resolveEsmModulePath = (specifier) =>
   url.fileURLToPath(importMetaResolve(specifier));
 const copyFileBuilder = ({ file }) =>
@@ -45,6 +46,7 @@ function getTypesFileConfig({ input: jsFileInput, outputBaseName, isPlugin }) {
     build: buildTypes,
   };
 }
+*/
 
 /**
  * @typedef {Object} BuildOptions
@@ -570,31 +572,29 @@ const universalFiles = [...nonPluginUniversalFiles, ...pluginFiles].flatMap(
 
     outputBaseName ??= path.basename(input);
 
-    return ( 
-      [
-        // {
-        //   format: "esm",
-        //   file: `${outputBaseName}${extensions.esm}`,
-        // },
-        {
-          format: "umd",
-          file: `${outputBaseName}${extensions.umd}`,
-          umdVariableName,
-        },
-      ].map((output) => ({
-        input,
-        output,
-        platform: "universal",
-        buildOptions: {
-          addDefaultExport: output.format === "esm",
-          ...buildOptions,
-        },
-        isPlugin,
-        build: buildJavascriptModule,
-        kind: "javascript",
-      }))
-      // getTypesFileConfig({ input, outputBaseName, isPlugin }),
-    );
+    return [
+      // {
+      //   format: "esm",
+      //   file: `${outputBaseName}${extensions.esm}`,
+      // },
+      {
+        format: "umd",
+        file: `${outputBaseName}${extensions.umd}`,
+        umdVariableName,
+      },
+    ].map((output) => ({
+      input,
+      output,
+      platform: "universal",
+      buildOptions: {
+        addDefaultExport: output.format === "esm",
+        ...buildOptions,
+      },
+      isPlugin,
+      build: buildJavascriptModule,
+      kind: "javascript",
+    }));
+    // getTypesFileConfig({ input, outputBaseName, isPlugin }),
   },
 );
 

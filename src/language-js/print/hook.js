@@ -17,6 +17,7 @@ import { printDeclareToken } from "./misc.js";
 function printHook(path, options, print) {
   const { node } = path;
 
+  /** @type {Doc[]} */
   const parts = ["hook"];
   if (node.id) {
     parts.push(" ", print("id"));

@@ -125,7 +125,7 @@ function printTypeParameter(path, options, print) {
   /**
    * @type {import("../../document/builders.js").Doc[]}
    */
-  const parts = [node.type === "TSTypeParameter" && node.const ? "const " : ""];
+  const parts = [node.const ? "const " : ""];
 
   const name = node.type === "TSTypeParameter" ? print("name") : node.name;
 

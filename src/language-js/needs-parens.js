@@ -891,6 +891,7 @@ function needsParens(path, options) {
         case "LogicalExpression":
         case "AwaitExpression":
         case "TSTypeAssertion":
+        case "MatchExpressionCase":
           return true;
 
         case "ConditionalExpression":

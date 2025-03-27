@@ -61,8 +61,8 @@ export function printMatchCase(path, options, print) {
 
   return [
     print("pattern"),
-    node.guard ? [" if ", print("guard")] : "",
-    group([":", comment, body]),
+    node.guard ? [" if (", print("guard"), ")"] : "",
+    group([" =>", comment, body]),
   ];
 }
 

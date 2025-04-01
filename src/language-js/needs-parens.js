@@ -1004,6 +1004,9 @@ function needsParens(path, options) {
 
     case "TSInstantiationExpression":
       return key === "object" && isMemberExpression(parent);
+
+    case "MatchOrPattern":
+      return parent.type === "MatchAsPattern";
   }
 
   return false;

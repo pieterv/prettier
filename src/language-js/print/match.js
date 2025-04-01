@@ -1,4 +1,5 @@
 import {
+  align,
   group,
   hardline,
   ifBreak,
@@ -7,10 +8,16 @@ import {
   line,
   softline,
 } from "../../document/builders.js";
-import { printDanglingComments } from "../../main/comments/print.js";
+import {
+  printComments,
+  printDanglingComments,
+} from "../../main/comments/print.js";
+import pathNeedsParens from "../needs-parens.js";
 import {
   CommentCheckFlags,
+  createTypeCheckFunction,
   hasComment,
+  hasLeadingOwnLineComment,
   isNextLineEmpty,
 } from "../utils/index.js";
 
@@ -80,17 +87,12 @@ export function printMatchCase(path, options, print) {
 - "MatchObjectPatternProperty"
 - "MatchRestPattern"
 */
-export function printMatchPattern(path, option, print) {
-  const { node, parent } = path;
+export function printMatchPattern(path, options, print) {
+  const { node } = path;
 
   switch (node.type) {
-    case "MatchOrPattern": {
-      const parts = join([" |", line], path.map(print, "patterns"));
-      if (parent.type === "MatchAsPattern") {
-        return ["(", parts, ")"];
-      }
-      return group(parts);
-    }
+    case "MatchOrPattern":
+      return printMatchOrPattern(path, options, print);
     case "MatchAsPattern":
       return [print("pattern"), " as ", print("target")];
     case "MatchWildcardPattern":
@@ -149,4 +151,99 @@ export function printMatchPattern(path, option, print) {
       return parts;
     }
   }
+}
+
+const isSimpleMatchPattern = createTypeCheckFunction([
+  "MatchWildcardPattern",
+  "MatchLiteralPattern",
+  "MatchUnaryPattern",
+  "MatchIdentifierPattern",
+]);
+
+function shouldHugMatchOrPattern(node) {
+  const { patterns } = node;
+  if (patterns.some((node) => hasComment(node))) {
+    return false;
+  }
+
+  const objectPattern = patterns.find(
+    (node) => node.type === "MatchObjectPattern",
+  );
+  if (!objectPattern) {
+    return false;
+  }
+
+  return patterns.every(
+    (node) => node === objectPattern || isSimpleMatchPattern(node),
+  );
+}
+
+function shouldHugMatchPattern(node) {
+  if (isSimpleMatchPattern(node) || node.type === "MatchObjectPattern") {
+    return true;
+  }
+
+  if (node.type === "MatchOrPattern") {
+    return shouldHugMatchOrPattern(node);
+  }
+
+  return false;
+}
+
+function printMatchOrPattern(path, options, print) {
+  const { node } = path;
+  // single-line variation
+  // A | B | C
+
+  // multi-line variation
+  // | A
+  // | B
+  // | C
+
+  const { parent } = path;
+
+  const shouldIndent =
+    parent.type !== "MatchStatementCase" &&
+    parent.type !== "MatchExpressionCase" &&
+    parent.type !== "MatchArrayPattern" &&
+    parent.type !== "MatchObjectPatternProperty" &&
+    !hasLeadingOwnLineComment(options.originalText, node);
+
+  // {
+  //   a: foo
+  // } | null | void
+  // should be inlined and not be printed in the multi-line variant
+  const shouldHug = shouldHugMatchPattern(node);
+
+  // We want to align the children but without its comment, so it looks like
+  // | child1
+  // // comment
+  // | child2
+  const printed = path.map((patternPath) => {
+    let printedPattern = print();
+    if (!shouldHug) {
+      printedPattern = align(2, printedPattern);
+    }
+    return printComments(patternPath, printedPattern, options);
+  }, "patterns");
+
+  if (shouldHug) {
+    return join(" | ", printed);
+  }
+
+  const code = [ifBreak(["| "]), join([line, "| "], printed)];
+
+  if (pathNeedsParens(path, options)) {
+    return group([indent([ifBreak([softline]), code]), softline]);
+  }
+
+  if (parent.type === "MatchArrayPattern" && parent.elements.length > 1) {
+    return group([
+      indent([ifBreak(["(", softline]), code]),
+      softline,
+      ifBreak(")"),
+    ]);
+  }
+
+  return group(shouldIndent ? indent(code) : code);
 }

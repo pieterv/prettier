@@ -57,6 +57,7 @@ function hasNakedLeftSide(node) {
     (node.type === "UpdateExpression" && !node.prefix) ||
     isBinaryCastExpression(node) ||
     node.type === "TSNonNullExpression" ||
+    node.type === "NonNullExpression" ||
     node.type === "ChainExpression"
   );
 }
@@ -167,7 +168,7 @@ function isStringLiteral(node) {
   return Boolean(
     node &&
       (node.type === "StringLiteral" ||
-        (node.type === "Literal" && typeof node.value === "string")),
+        (node.type === "Literal" && typeof node.value === "string"))
   );
 }
 
@@ -411,11 +412,11 @@ const skipChainExpression = (fn) => (node) => {
 };
 
 const isCallExpression = skipChainExpression(
-  createTypeCheckFunction(["CallExpression", "OptionalCallExpression"]),
+  createTypeCheckFunction(["CallExpression", "OptionalCallExpression"])
 );
 
 const isMemberExpression = skipChainExpression(
-  createTypeCheckFunction(["MemberExpression", "OptionalMemberExpression"]),
+  createTypeCheckFunction(["MemberExpression", "OptionalMemberExpression"])
 );
 
 /**
@@ -443,7 +444,7 @@ function isSimpleTemplateLiteral(node) {
 
 function isSimpleMemberExpression(
   node,
-  { maxDepth = Number.POSITIVE_INFINITY } = {},
+  { maxDepth = Number.POSITIVE_INFINITY } = {}
 ) {
   if (hasComment(node)) {
     return false;
@@ -571,7 +572,7 @@ function hasLeadingOwnLineComment(text, node) {
   }
 
   return hasComment(node, CommentCheckFlags.Leading, (comment) =>
-    hasNewline(text, locEnd(comment)),
+    hasNewline(text, locEnd(comment))
   );
 }
 
@@ -606,7 +607,7 @@ function needsHardlineAfterDanglingComment(node) {
     return false;
   }
   const lastDanglingComment = getComments(node, CommentCheckFlags.Dangling).at(
-    -1,
+    -1
   );
   return lastDanglingComment && !isBlockComment(lastDanglingComment);
 }
@@ -673,6 +674,10 @@ function isSimpleCallArgument(node, depth = 2) {
     return isSimpleCallArgument(node.expression, depth);
   }
 
+  if (node.type === "NonNullExpression") {
+    return isSimpleCallArgument(node.argument, depth);
+  }
+
   const isChildSimple = (child) => isSimpleCallArgument(child, depth - 1);
 
   if (isRegExpLiteral(node)) {
@@ -696,8 +701,7 @@ function isSimpleCallArgument(node, depth = 2) {
 
   if (isObjectOrRecordExpression(node)) {
     return node.properties.every(
-      (p) =>
-        !p.computed && (p.shorthand || (p.value && isChildSimple(p.value))),
+      (p) => !p.computed && (p.shorthand || (p.value && isChildSimple(p.value)))
     );
   }
 
@@ -810,6 +814,8 @@ function startsWithNoLookaheadToken(node, predicate) {
     case "AsConstExpression":
     case "SatisfiesExpression":
       return startsWithNoLookaheadToken(node.expression, predicate);
+    case "NonNullExpression":
+      return startsWithNoLookaheadToken(node.argument, predicate);
     default:
       return predicate(node);
   }
@@ -890,8 +896,8 @@ const PRECEDENCE = new Map(
     ["*", "/", "%"],
     ["**"],
   ].flatMap((operators, index) =>
-    operators.map((operator) => [operator, index]),
-  ),
+    operators.map((operator) => [operator, index])
+  )
 );
 function getPrecedence(operator) {
   return PRECEDENCE.get(operator);
@@ -988,7 +994,7 @@ function iterateCallArgumentsPath(path, iteratee) {
   if (node.type === "ChainExpression") {
     return path.call(
       () => iterateCallArgumentsPath(path, iteratee),
-      "expression",
+      "expression"
     );
   }
 

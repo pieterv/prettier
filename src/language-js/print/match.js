@@ -68,7 +68,7 @@ export function printMatchCase(path, options, print) {
 
   return [
     print("pattern"),
-    node.guard ? [" if (", print("guard"), ")"] : "",
+    node.guard ? group([indent([line, "if (", print("guard"), ")"])]) : "",
     group([" =>", comment, body]),
   ];
 }

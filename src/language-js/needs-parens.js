@@ -1009,7 +1009,8 @@ function needsParens(path, options) {
           parent.type !== "ThrowStatement" &&
           parent.type !== "TypeCastExpression" &&
           parent.type !== "VariableDeclarator" &&
-          parent.type !== "YieldExpression")
+          parent.type !== "YieldExpression" &&
+          parent.type !== "MatchExpressionCase")
       );
 
     case "TSInstantiationExpression":

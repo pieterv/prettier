@@ -54,7 +54,7 @@ function printMemberChain(path, options, print) {
   if (path.node.type === "ChainExpression") {
     return path.call(
       () => printMemberChain(path, options, print),
-      "expression",
+      "expression"
     );
   }
 
@@ -78,7 +78,7 @@ function printMemberChain(path, options, print) {
     const { originalText } = options;
     const nextCharIndex = getNextNonSpaceNonCommentCharacterIndex(
       originalText,
-      locEnd(node),
+      locEnd(node)
     );
     const nextChar = originalText.charAt(nextCharIndex);
 
@@ -117,7 +117,7 @@ function printMemberChain(path, options, print) {
               printFunctionTypeParameters(path, options, print),
               printCallArguments(path, options, print),
             ],
-            options,
+            options
           ),
           hasTrailingEmptyLine ? hardline : "",
         ],
@@ -132,7 +132,7 @@ function printMemberChain(path, options, print) {
           isMemberExpression(node)
             ? printMemberLookup(path, options, print)
             : printBindExpressionCallee(path, options, print),
-          options,
+          options
         ),
       });
       path.call((object) => rec(object), "object");
@@ -142,6 +142,12 @@ function printMemberChain(path, options, print) {
         printed: printComments(path, "!", options),
       });
       path.call((expression) => rec(expression), "expression");
+    } else if (node.type === "NonNullExpression") {
+      printedNodes.unshift({
+        node,
+        printed: printComments(path, "!", options),
+      });
+      path.call((argument) => rec(argument), "argument");
     } else {
       printedNodes.unshift({
         node,
@@ -197,6 +203,7 @@ function printMemberChain(path, options, print) {
   for (; i < printedNodes.length; ++i) {
     if (
       printedNodes[i].node.type === "TSNonNullExpression" ||
+      printedNodes[i].node.type === "NonNullExpression" ||
       isCallExpression(printedNodes[i].node) ||
       (isMemberExpression(printedNodes[i].node) &&
         printedNodes[i].node.computed &&
@@ -405,7 +412,7 @@ function printMemberChain(path, options, print) {
     nodeHasComment ||
     (callExpressions.length > 2 &&
       callExpressions.some(
-        (expr) => !expr.arguments.every((arg) => isSimpleCallArgument(arg)),
+        (expr) => !expr.arguments.every((arg) => isSimpleCallArgument(arg))
       )) ||
     printedGroups.slice(0, -1).some(willBreak) ||
     lastGroupWillBreakAndOtherCallsHaveFunctionArguments()

@@ -97,7 +97,7 @@ function clean(original, cloned, parent) {
     original.type === "JSXElement" &&
     original.openingElement.name.name === "style" &&
     original.openingElement.attributes.some(
-      (attr) => attr.type === "JSXAttribute" && attr.name.name === "jsx",
+      (attr) => attr.type === "JSXAttribute" && attr.name.name === "jsx"
     )
   ) {
     for (const { type, expression } of cloned.children) {
@@ -128,7 +128,7 @@ function clean(original, cloned, parent) {
   ) {
     cloned.value.value = original.value.value.replaceAll(
       /["']|&quot;|&apos;/g,
-      '"',
+      '"'
     );
   }
 
@@ -185,8 +185,8 @@ function clean(original, cloned, parent) {
       (comment) =>
         isBlockComment(comment) &&
         ["GraphQL", "HTML"].some(
-          (languageName) => comment.value === ` ${languageName} `,
-        ),
+          (languageName) => comment.value === ` ${languageName} `
+        )
     );
     if (
       hasLanguageComment ||
@@ -207,6 +207,17 @@ function clean(original, cloned, parent) {
     // Ideally, we should swap these two nodes, but `type` is the only difference
     cloned.type = "TSNonNullExpression";
     cloned.expression.type = "ChainExpression";
+  }
+
+  if (
+    original.type === "ChainExpression" &&
+    original.expression.type === "NonNullExpression"
+  ) {
+    cloned.type = "NonNullExpression";
+    cloned.argument = cloned.expression;
+    cloned.chain = cloned.argument.chain;
+    cloned.argument.type = "ChainExpression";
+    cloned.argument.expression = cloned.argument.argument;
   }
 }
 

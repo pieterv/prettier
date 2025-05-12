@@ -154,7 +154,8 @@ function shouldExtraIndentForConditionalExpression(path) {
       (node.type === "ChainExpression" && node.expression === child) ||
       (isCallExpression(node) && node.callee === child) ||
       (isMemberExpression(node) && node.object === child) ||
-      (node.type === "TSNonNullExpression" && node.expression === child)
+      (node.type === "TSNonNullExpression" && node.expression === child) ||
+      (node.type === "NonNullExpression" && node.argument === child)
     ) {
       child = node;
       continue;
@@ -229,7 +230,7 @@ function printTernaryOld(path, options, print) {
     currentParent &&
     currentParent.type === node.type &&
     testNodePropertyNames.every(
-      (prop) => currentParent[prop] !== previousParent,
+      (prop) => currentParent[prop] !== previousParent
     )
   );
   const firstNonConditionalParent = currentParent || parent;
@@ -272,13 +273,13 @@ function printTernaryOld(path, options, print) {
       " : ",
       alternateNode.type === node.type || isNil(alternateNode)
         ? print(alternateNodePropertyName)
-        : wrap(print(alternateNodePropertyName)),
+        : wrap(print(alternateNodePropertyName))
     );
   } else {
     /*
     This does not mean to indent, but make the doc aligned with the first character after `? ` or `: `,
     so we use `2` instead of `options.tabWidth` here.
-    
+
     ```js
     test
      ? {
@@ -288,7 +289,7 @@ function printTernaryOld(path, options, print) {
     ```
 
     instead of
-    
+
     ```js
     test
      ? {
@@ -318,8 +319,8 @@ function printTernaryOld(path, options, print) {
         isParentTest
         ? part
         : options.useTabs
-          ? dedent(indent(part))
-          : align(Math.max(0, options.tabWidth - 2), part),
+        ? dedent(indent(part))
+        : align(Math.max(0, options.tabWidth - 2), part)
     );
   }
 
@@ -338,16 +339,16 @@ function printTernaryOld(path, options, print) {
         hasNewlineInRange(
           options.originalText,
           locStart(comment),
-          locEnd(comment),
-        ),
-    ),
+          locEnd(comment)
+        )
+    )
   );
   const maybeGroup = (doc) =>
     parent === firstNonConditionalParent
       ? group(doc, { shouldBreak })
       : shouldBreak
-        ? [doc, breakParent]
-        : doc;
+      ? [doc, breakParent]
+      : doc;
 
   // Break the closing paren to keep the chain right after it:
   // (a

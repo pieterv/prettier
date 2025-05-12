@@ -44,6 +44,7 @@ const additionalVisitorKeys = {
   AsExpression: ["expression", "typeAnnotation"],
   AsConstExpression: ["expression"],
   SatisfiesExpression: ["expression", "typeAnnotation"],
+  NonNullExpression: ["argument"],
   TypeofTypeAnnotation: ["argument", "typeArguments"],
 };
 
@@ -76,13 +77,13 @@ const visitorKeys = Object.fromEntries(
       flowVisitorKeys,
       angularVisitorKeys,
       additionalVisitorKeys,
-    ]),
+    ])
   ).map(([type, keys]) => [
     type,
     excludeKeys[type]
       ? keys.filter((key) => !excludeKeys[type].includes(key))
       : keys,
-  ]),
+  ])
 );
 
 export default visitorKeys;

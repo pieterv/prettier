@@ -8,6 +8,7 @@ import {
 import printFrontMatter from "../utils/front-matter/print.js";
 import printAngularControlFlowBlockParameters from "./embed/angular-control-flow-block-parameters.js";
 import printAttribute from "./embed/attribute.js";
+import { formatAttributeValue } from "./embed/utils.js";
 import getNodeContent from "./get-node-content.js";
 import {
   needsToBorrowPrevClosingTagEndMarker,
@@ -38,7 +39,7 @@ function embed(path, options) {
 
   switch (node.type) {
     case "element":
-      if (isScriptLikeTag(node) || node.type === "interpolation") {
+      if (isScriptLikeTag(node, options) || node.type === "interpolation") {
         // Fall through to "text"
         return;
       }
@@ -51,7 +52,7 @@ function embed(path, options) {
 
         return (textToDoc, print) => {
           const content = getNodeContent(node, options);
-          let isEmpty = /^\s*$/.test(content);
+          let isEmpty = /^\s*$/u.test(content);
           let doc = "";
           if (!isEmpty) {
             doc = textToDoc(htmlTrimPreserveIndentation(content), {
@@ -75,13 +76,13 @@ function embed(path, options) {
       break;
 
     case "text":
-      if (isScriptLikeTag(node.parent)) {
+      if (isScriptLikeTag(node.parent, options)) {
         const parser = inferElementParser(node.parent, options);
         if (parser) {
           return (textToDoc) => {
             const value =
               parser === "markdown"
-                ? dedentString(node.value.replace(/^[^\S\n]*\n/, ""))
+                ? dedentString(node.value.replace(/^[^\S\n]*\n/u, ""))
                 : node.value;
             const textToDocOptions = { parser, __embeddedInHtml: true };
             if (options.parser === "html" && parser === "babel") {
@@ -90,7 +91,8 @@ function embed(path, options) {
               if (
                 attrMap &&
                 (attrMap.type === "module" ||
-                  (attrMap.type === "text/babel" &&
+                  ((attrMap.type === "text/babel" ||
+                    attrMap.type === "text/jsx") &&
                     attrMap["data-type"] === "module"))
               ) {
                 sourceType = "module";
@@ -114,7 +116,6 @@ function embed(path, options) {
           };
           if (options.parser === "angular") {
             textToDocOptions.parser = "__ng_interpolation";
-            textToDocOptions.trailingComma = "none";
           } else if (options.parser === "vue") {
             textToDocOptions.parser = isVueSfcWithTypescriptScript(
               path,
@@ -149,6 +150,13 @@ function embed(path, options) {
       }
 
       return printAngularControlFlowBlockParameters;
+
+    case "angularLetDeclarationInitializer":
+      return (textToDoc) =>
+        formatAttributeValue(node.value, textToDoc, {
+          parser: "__ng_binding",
+          __isInHtmlAttribute: false,
+        });
   }
 }
 

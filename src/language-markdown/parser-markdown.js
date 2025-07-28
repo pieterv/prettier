@@ -2,10 +2,9 @@ import footnotes from "remark-footnotes";
 import remarkMath from "remark-math";
 import remarkParse from "remark-parse";
 import unified from "unified";
-
 import { locEnd, locStart } from "./loc.js";
 import { BLOCKS_REGEX, esSyntax } from "./mdx.js";
-import { hasPragma } from "./pragma.js";
+import { hasIgnorePragma, hasPragma } from "./pragma.js";
 import frontMatter from "./unified-plugins/front-matter.js";
 import htmlToJsx from "./unified-plugins/html-to-jsx.js";
 import liquid from "./unified-plugins/liquid.js";
@@ -48,6 +47,7 @@ function noop() {}
 const baseParser = {
   astFormat: "mdast",
   hasPragma,
+  hasIgnorePragma,
   locStart,
   locEnd,
 };

@@ -1,5 +1,5 @@
 export function fixPrettierVersion(version) {
-  const match = version.match(/^\d+\.\d+\.\d+-pr.(\d+)$/);
+  const match = version.match(/^\d+\.\d+\.\d+-pr.(\d+)$/u);
   if (match) {
     return `pr-${match[1]}`;
   }
@@ -53,18 +53,19 @@ export function getCodemirrorMode(parser) {
 }
 
 const astAutoFold = {
-  estree: /^\s*"(loc|start|end|tokens|\w+Comments|comments)":/,
-  postcss: /^\s*"(source|input|raws|file)":/,
-  html: /^\s*"(\w+Span|valueTokens|tokens|file|tagDefinition)":/,
-  mdast: /^\s*"position":/,
-  yaml: /^\s*"position":/,
-  glimmer: /^\s*"loc":/,
-  graphql: /^\s*"loc":/,
+  estree: /^\s*"(loc|start|end|tokens|\w+Comments|comments)":/u,
+  postcss: /^\s*"(source|input|raws|file)":/u,
+  html: /^\s*"(\w+Span|valueTokens|tokens|file|tagDefinition)":/u,
+  mdast: /^\s*"position":/u,
+  yaml: /^\s*"position":/u,
+  glimmer: /^\s*"loc":/u,
+  graphql: /^\s*"loc":/u,
 };
 
 export function getAstAutoFold(parser) {
   switch (parser) {
     case "flow":
+    case "hermes":
     case "babel":
     case "babel-flow":
     case "babel-ts":
@@ -84,6 +85,7 @@ export function getAstAutoFold(parser) {
     case "angular":
     case "vue":
     case "lwc":
+    case "mjml":
       return astAutoFold.html;
     case "markdown":
     case "mdx":
@@ -117,28 +119,4 @@ export function convertOffsetToSelection(offset, content) {
     }
   }
   return { anchor: { line, ch } };
-}
-
-/**
- * Copied from https://github.com/prettier/prettier/blob/6fe21780115cf5f74f83876d64b03a727fbab220/src/cli/utils.js#L6-L27
- * @template Obj
- * @template Key
- * @param {Array<Obj>} array
- * @param {(value: Obj) => Key} iteratee
- * @returns {{[p in Key]: T}}
- */
-export function groupBy(array, iteratee) {
-  const result = Object.create(null);
-
-  for (const value of array) {
-    const key = iteratee(value);
-
-    if (Array.isArray(result[key])) {
-      result[key].push(value);
-    } else {
-      result[key] = [value];
-    }
-  }
-
-  return result;
 }

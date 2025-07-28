@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../../common/ast-path.js").default} AstPath
+ * @import AstPath from "../../common/ast-path.js"
  */
 
 import { hardline, join, line } from "../../document/builders.js";
@@ -16,7 +16,7 @@ import {
 import isUnknownNamespace from "./is-unknown-namespace.js";
 
 const htmlTrimLeadingBlankLines = (string) =>
-  string.replaceAll(/^[\t\f\r ]*\n/g, "");
+  string.replaceAll(/^[\t\f\r ]*\n/gu, "");
 const htmlTrimPreserveIndentation = (string) =>
   htmlTrimLeadingBlankLines(htmlWhitespaceUtils.trimEnd(string));
 const getLeadingAndTrailingHtmlWhitespace = (string) => {
@@ -67,7 +67,7 @@ function shouldPreserveContent(node, options) {
 
   if (
     isVueNonHtmlBlock(node, options) &&
-    !isScriptLikeTag(node) &&
+    !isScriptLikeTag(node, options) &&
     node.type !== "interpolation"
   ) {
     return true;
@@ -103,25 +103,26 @@ function isTextLikeNode(node) {
   return node.type === "text" || node.type === "comment";
 }
 
-function isScriptLikeTag(node) {
+function isScriptLikeTag(node, options) {
   return (
     node.type === "element" &&
     (node.fullName === "script" ||
       node.fullName === "style" ||
       node.fullName === "svg:style" ||
       node.fullName === "svg:script" ||
+      (node.fullName === "mj-style" && options.parser === "mjml") ||
       (isUnknownNamespace(node) &&
         (node.name === "script" || node.name === "style")))
   );
 }
 
-function canHaveInterpolation(node) {
-  return node.children && !isScriptLikeTag(node);
+function canHaveInterpolation(node, options) {
+  return node.children && !isScriptLikeTag(node, options);
 }
 
-function isWhitespaceSensitiveNode(node) {
+function isWhitespaceSensitiveNode(node, options) {
   return (
-    isScriptLikeTag(node) ||
+    isScriptLikeTag(node, options) ||
     node.type === "interpolation" ||
     isIndentationSensitiveNode(node)
   );
@@ -169,7 +170,7 @@ function isLeadingSpaceSensitiveNode(node, options) {
       !node.prev &&
       (node.parent.type === "root" ||
         (isPreLikeNode(node) && node.parent) ||
-        isScriptLikeTag(node.parent) ||
+        isScriptLikeTag(node.parent, options) ||
         isVueCustomBlock(node.parent, options) ||
         !isFirstChildLeadingSpaceSensitiveCssDisplay(node.parent.cssDisplay))
     ) {
@@ -212,7 +213,7 @@ function isTrailingSpaceSensitiveNode(node, options) {
     !node.next &&
     (node.parent.type === "root" ||
       (isPreLikeNode(node) && node.parent) ||
-      isScriptLikeTag(node.parent) ||
+      isScriptLikeTag(node.parent, options) ||
       isVueCustomBlock(node.parent, options) ||
       !isLastChildTrailingSpaceSensitiveCssDisplay(node.parent.cssDisplay))
   ) {
@@ -229,10 +230,10 @@ function isTrailingSpaceSensitiveNode(node, options) {
   return true;
 }
 
-function isDanglingSpaceSensitiveNode(node) {
+function isDanglingSpaceSensitiveNode(node, options) {
   return (
     isDanglingSpaceSensitiveCssDisplay(node.cssDisplay) &&
-    !isScriptLikeTag(node)
+    !isScriptLikeTag(node, options)
   );
 }
 
@@ -342,6 +343,7 @@ function inferParserByTypeAttribute(type) {
     case "module":
     case "text/javascript":
     case "text/babel":
+    case "text/jsx":
     case "application/javascript":
       return "babel";
 
@@ -404,11 +406,14 @@ function inferVueSfcBlockParser(node, options) {
 }
 
 function inferStyleParser(node, options) {
-  if (node.name !== "style") {
-    return;
+  if (node.name === "style") {
+    const { lang } = node.attrMap;
+    return lang ? inferParser(options, { language: lang }) : "css";
   }
-  const { lang } = node.attrMap;
-  return lang ? inferParser(options, { language: lang }) : "css";
+
+  if (node.name === "mj-style" && options.parser === "mjml") {
+    return "css";
+  }
 }
 
 function inferElementParser(node, options) {
@@ -473,7 +478,7 @@ function getNodeCssStyleDisplay(node, options) {
 
   if (node.prev?.type === "comment") {
     // <!-- display: block -->
-    const match = node.prev.value.match(/^\s*display:\s*([a-z]+)\s*$/);
+    const match = node.prev.value.match(/^\s*display:\s*([a-z]+)\s*$/u);
     if (match) {
       return match[1];
     }
@@ -494,24 +499,28 @@ function getNodeCssStyleDisplay(node, options) {
     case "ignore":
       return "block";
     default:
-      return (
-        (node.type === "element" &&
-          (!node.namespace ||
-            isInSvgForeignObject ||
-            isUnknownNamespace(node)) &&
-          CSS_DISPLAY_TAGS[node.name]) ||
-        CSS_DISPLAY_DEFAULT
-      );
+      if (
+        node.type === "element" &&
+        (!node.namespace || isInSvgForeignObject || isUnknownNamespace(node)) &&
+        Object.hasOwn(CSS_DISPLAY_TAGS, node.name)
+      ) {
+        return CSS_DISPLAY_TAGS[node.name];
+      }
   }
+
+  return CSS_DISPLAY_DEFAULT;
 }
 
 function getNodeCssStyleWhiteSpace(node) {
-  return (
-    (node.type === "element" &&
-      (!node.namespace || isUnknownNamespace(node)) &&
-      CSS_WHITE_SPACE_TAGS[node.name]) ||
-    CSS_WHITE_SPACE_DEFAULT
-  );
+  if (
+    node.type === "element" &&
+    (!node.namespace || isUnknownNamespace(node)) &&
+    Object.hasOwn(CSS_WHITE_SPACE_TAGS, node.name)
+  ) {
+    return CSS_WHITE_SPACE_TAGS[node.name];
+  }
+
+  return CSS_WHITE_SPACE_DEFAULT;
 }
 
 function getMinIndentation(text) {
@@ -630,12 +639,10 @@ export {
   getLastDescendant,
   getLeadingAndTrailingHtmlWhitespace,
   getNodeCssStyleDisplay,
-  getNodeCssStyleWhiteSpace,
   getTextValueParts,
   getUnescapedAttributeValue,
   hasPrettierIgnore,
   htmlTrimPreserveIndentation,
-  htmlWhitespaceUtils,
   inferElementParser,
   isDanglingSpaceSensitiveNode,
   isIndentationSensitiveNode,
@@ -644,7 +651,6 @@ export {
   isScriptLikeTag,
   isTextLikeNode,
   isTrailingSpaceSensitiveNode,
-  isUnknownNamespace,
   isVueCustomBlock,
   isVueNonHtmlBlock,
   isVueScriptTag,
@@ -653,7 +659,6 @@ export {
   isVueSlotAttribute,
   isWhitespaceSensitiveNode,
   preferHardlineAsLeadingSpaces,
-  preferHardlineAsTrailingSpaces,
   shouldPreserveContent,
   unescapeQuoteEntities,
 };

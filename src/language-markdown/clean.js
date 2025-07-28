@@ -1,6 +1,6 @@
 import collapseWhiteSpace from "collapse-white-space";
-
 import isFrontMatter from "../utils/front-matter/is-front-matter.js";
+import { FORMAT_PRAGMAS } from "../utils/pragma/pragma.evaluate.js";
 import { startWithPragma } from "./pragma.js";
 
 const ignoredProperties = new Set([
@@ -38,7 +38,7 @@ function clean(original, cloned, parent) {
   }
 
   if (original.type === "wikiLink") {
-    cloned.value = original.value.trim().replaceAll(/[\t\n]+/g, " ");
+    cloned.value = original.value.trim().replaceAll(/[\t\n]+/gu, " ");
   }
 
   if (
@@ -68,7 +68,7 @@ function clean(original, cloned, parent) {
       original.type === "image") &&
     original.title
   ) {
-    cloned.title = original.title.replaceAll(/\\(?=["')])/g, "");
+    cloned.title = original.title.replaceAll(/\\(?=["')])/gu, "");
   }
 
   // for insert pragma
@@ -78,7 +78,7 @@ function clean(original, cloned, parent) {
     (parent.children[0] === original ||
       (isFrontMatter(parent.children[0]) && parent.children[1] === original)) &&
     original.type === "html" &&
-    startWithPragma(original.value)
+    startWithPragma(original.value, FORMAT_PRAGMAS)
   ) {
     return null;
   }

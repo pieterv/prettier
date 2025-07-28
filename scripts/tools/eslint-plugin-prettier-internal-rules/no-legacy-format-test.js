@@ -1,4 +1,4 @@
-"use strict";
+import path from "node:path";
 
 const legacyRunFormatTestCall = [
   "CallExpression",
@@ -34,19 +34,18 @@ const dirnamePropertySelector = [
 const MESSAGE_ID_LEGACY_FUNCTION_NAME = "legacy-function-name";
 const MESSAGE_ID_ARGUMENT = "dirname-argument";
 const MESSAGE_ID_PROPERTY = "dirname-property";
+const MESSAGE_ID_LEGACY_FILENAME = "legacy-filename";
 
-module.exports = {
+export default {
   meta: {
     type: "suggestion",
-    docs: {
-      url: "https://github.com/prettier/prettier/blob/main/scripts/tools/eslint-plugin-prettier-internal-rules/no-legacy-format-test.js",
-    },
     messages: {
       [MESSAGE_ID_LEGACY_FUNCTION_NAME]:
         "Use `runFormatTest(…)` instead of `run_spec(…)`.",
       [MESSAGE_ID_ARGUMENT]: "Use `import.meta` instead of `__dirname`.",
       [MESSAGE_ID_PROPERTY]:
         "Use `importMeta: import.meta` instead of `dirname: __dirname`.",
+      [MESSAGE_ID_LEGACY_FILENAME]: "File should be named as 'format.test.js'.",
     },
     fixable: "code",
     hasSuggestions: true,
@@ -76,6 +75,17 @@ module.exports = {
             fixer.replaceText(node.key, "importMeta"),
             fixer.replaceText(node.value, "import.meta"),
           ],
+        });
+      },
+      Program(node) {
+        const filename = path.basename(context.physicalFilename);
+        if (filename !== "jsfmt.spec.js") {
+          return;
+        }
+
+        context.report({
+          node,
+          messageId: MESSAGE_ID_LEGACY_FILENAME,
         });
       },
     };

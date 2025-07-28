@@ -11,5 +11,7 @@ export const {
   normalizeOptionSettings,
   vnopts,
   fastGlob,
-  mockable,
+  createTwoFilesPatch,
+  picocolors,
+  leven,
 } = sharedWithCli;

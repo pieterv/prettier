@@ -16,14 +16,19 @@ import getStringWidth from "../../utils/get-string-width.js";
 import hasNewlineInRange from "../../utils/has-newline-in-range.js";
 import { locEnd, locStart } from "../loc.js";
 import {
+  CommentCheckFlags,
+  getComments,
   hasComment,
   isBinaryCastExpression,
   isBinaryish,
   isMemberExpression,
-  isSimpleTemplateLiteral,
 } from "../utils/index.js";
 
-function printTemplateLiteral(path, print, options) {
+/**
+ * @import {Doc} from "../../document/builders.js"
+ */
+
+function printTemplateLiteral(path, options, print) {
   const { node } = path;
   const isTemplateLiteral = node.type === "TemplateLiteral";
 
@@ -39,18 +44,7 @@ function printTemplateLiteral(path, print, options) {
   }
   const parts = [];
 
-  let expressionDocs = path.map(print, expressionsKey);
-  const isSimple = isSimpleTemplateLiteral(node);
-
-  if (isSimple) {
-    expressionDocs = expressionDocs.map(
-      (doc) =>
-        printDocToString(doc, {
-          ...options,
-          printWidth: Number.POSITIVE_INFINITY,
-        }).formatted,
-    );
-  }
+  const expressionDocs = path.map(print, expressionsKey);
 
   parts.push(lineSuffixBoundary, "`");
 
@@ -82,44 +76,43 @@ function printTemplateLiteral(path, print, options) {
 
     let expressionDoc = expressionDocs[index];
 
-    if (!isSimple) {
-      const expression = node[expressionsKey][index];
+    const expression = node[expressionsKey][index];
 
-      let interpolationHasNewline = hasNewlineInRange(
-        options.originalText,
-        locEnd(quasi),
-        locStart(node.quasis[index + 1]),
-      );
+    let interpolationHasNewline = hasNewlineInRange(
+      options.originalText,
+      locEnd(quasi),
+      locStart(node.quasis[index + 1]),
+    );
 
-      if (!interpolationHasNewline) {
-        // Never add a newline to an interpolation which didn't already have one...
-        const renderedExpression = printDocToString(expressionDoc, {
-          ...options,
-          printWidth: Number.POSITIVE_INFINITY,
-        }).formatted;
+    if (!interpolationHasNewline) {
+      // Never add a newline to an interpolation which didn't already have one...
+      const renderedExpression = printDocToString(expressionDoc, {
+        ...options,
+        printWidth: Number.POSITIVE_INFINITY,
+      }).formatted;
 
-        // ... unless one will be introduced anyway, e.g. by a nested function.
-        // This case is rare, so we can pay the cost of re-rendering.
-        if (renderedExpression.includes("\n")) {
-          interpolationHasNewline = true;
-        } else {
-          expressionDoc = renderedExpression;
-        }
+      // ... unless one will be introduced anyway, e.g. by a nested function.
+      // This case is rare, so we can pay the cost of re-rendering.
+      if (renderedExpression.includes("\n")) {
+        interpolationHasNewline = true;
+      } else {
+        expressionDoc = renderedExpression;
       }
+    }
 
-      // Breaks at the template element boundaries (${ and }) are preferred to breaking
-      // in the middle of a MemberExpression
-      if (
-        interpolationHasNewline &&
-        (hasComment(expression) ||
-          isMemberExpression(expression) ||
-          expression.type === "ConditionalExpression" ||
-          expression.type === "SequenceExpression" ||
-          isBinaryCastExpression(expression) ||
-          isBinaryish(expression))
-      ) {
-        expressionDoc = [indent([softline, expressionDoc]), softline];
-      }
+    // Breaks at the template element boundaries (${ and }) are preferred to breaking
+    // in the middle of a MemberExpression
+    if (
+      interpolationHasNewline &&
+      (hasComment(expression) ||
+        expression.type === "Identifier" ||
+        isMemberExpression(expression) ||
+        expression.type === "ConditionalExpression" ||
+        expression.type === "SequenceExpression" ||
+        isBinaryCastExpression(expression) ||
+        isBinaryish(expression))
+    ) {
+      expressionDoc = [indent([softline, expressionDoc]), softline];
     }
 
     const aligned =
@@ -135,11 +128,34 @@ function printTemplateLiteral(path, print, options) {
   return parts;
 }
 
-function printTaggedTemplateLiteral(print) {
+function printTaggedTemplateLiteral(path, options, print) {
   const quasiDoc = print("quasi");
+  const { node } = path;
+
+  /** @type {Doc} */
+  let space = "";
+  const quasiLeadingComment = getComments(
+    node.quasi,
+    CommentCheckFlags.Leading,
+  )[0];
+  if (quasiLeadingComment) {
+    if (
+      hasNewlineInRange(
+        options.originalText,
+        locEnd(node.typeArguments ?? node.typeParameters ?? node.tag),
+        locStart(quasiLeadingComment),
+      )
+    ) {
+      space = softline;
+    } else {
+      space = " ";
+    }
+  }
+
   return label(quasiDoc.label && { tagged: true, ...quasiDoc.label }, [
     print("tag"),
-    print("typeParameters"),
+    print(node.typeArguments ? "typeArguments" : "typeParameters"),
+    space,
     lineSuffixBoundary,
     quasiDoc,
   ]);
@@ -153,7 +169,7 @@ function printJestEachTemplateLiteral(path, options, print) {
    * ${2} | ${1} | ${3}
    */
   const { node } = path;
-  const headerNames = node.quasis[0].value.raw.trim().split(/\s*\|\s*/);
+  const headerNames = node.quasis[0].value.raw.trim().split(/\s*\|\s*/u);
   if (
     headerNames.length > 1 ||
     headerNames.some((headerName) => headerName.length > 0)
@@ -254,7 +270,7 @@ function escapeTemplateCharacters(doc, raw) {
   return mapDoc(doc, (currentDoc) => {
     if (typeof currentDoc === "string") {
       return raw
-        ? currentDoc.replaceAll(/(\\*)`/g, "$1$1\\`")
+        ? currentDoc.replaceAll(/(\\*)`/gu, "$1$1\\`")
         : uncookTemplateElementValue(currentDoc);
     }
 
@@ -263,7 +279,7 @@ function escapeTemplateCharacters(doc, raw) {
 }
 
 function uncookTemplateElementValue(cookedValue) {
-  return cookedValue.replaceAll(/([\\`]|\${)/g, "\\$1");
+  return cookedValue.replaceAll(/([\\`]|\$\{)/gu, String.raw`\$1`);
 }
 
 function isJestEachTemplateLiteral({ node, parent }) {
@@ -277,7 +293,7 @@ function isJestEachTemplateLiteral({ node, parent }) {
    *
    * Ref: https://github.com/facebook/jest/pull/6102
    */
-  const jestEachTriggerRegex = /^[fx]?(?:describe|it|test)$/;
+  const jestEachTriggerRegex = /^[fx]?(?:describe|it|test)$/u;
   return (
     parent.type === "TaggedTemplateExpression" &&
     parent.quasi === node &&

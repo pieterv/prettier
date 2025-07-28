@@ -15,6 +15,7 @@ import {
   createTypeCheckFunction,
   hasComment,
   hasLeadingOwnLineComment,
+  isConditionalType,
   isFlowObjectTypePropertyAFunction,
   isObjectType,
   isSimpleType,
@@ -32,7 +33,7 @@ import {
 } from "./misc.js";
 
 /**
- * @typedef {import("../../document/builders.js").Doc} Doc
+ * @import {Doc} from "../../document/builders.js"
  */
 
 const isVoidType = createTypeCheckFunction([
@@ -140,8 +141,14 @@ function printIntersectionType(path, options, print) {
         return [" & ", wasIndented ? indent(doc) : doc];
       }
 
-      // If no object is involved, go to the next line if it breaks
-      if (!previousIsObjectType && !currentIsObjectType) {
+      if (
+        // If no object is involved, go to the next line if it breaks
+        (!previousIsObjectType && !currentIsObjectType) ||
+        hasLeadingOwnLineComment(options.originalText, node)
+      ) {
+        if (options.experimentalOperatorPosition === "start") {
+          return indent([line, "& ", doc]);
+        }
         return indent([" &", line, doc]);
       }
 
@@ -171,9 +178,7 @@ function printUnionType(path, options, print) {
   // If there's a leading comment, the parent is doing the indentation
   const shouldIndent =
     parent.type !== "TypeParameterInstantiation" &&
-    (parent.type !== "TSConditionalType" || !options.experimentalTernaries) &&
-    (parent.type !== "ConditionalTypeAnnotation" ||
-      !options.experimentalTernaries) &&
+    (!isConditionalType(parent) || !options.experimentalTernaries) &&
     parent.type !== "TSTypeParameterInstantiation" &&
     parent.type !== "GenericTypeAnnotation" &&
     parent.type !== "TSTypeReference" &&
@@ -293,8 +298,8 @@ function printFunctionType(path, options, print) {
 
   let parametersDoc = printFunctionParameters(
     path,
-    print,
     options,
+    print,
     /* expandArg */ false,
     /* printTypeParams */ true,
   );
@@ -488,6 +493,18 @@ const getTypeAnnotationFirstToken = (path) => {
     ) ||
     /*
     Flow
+    ```js
+    declare hook foo(): void;
+                    ^^^^^^^^ `TypeAnnotation`
+    ```
+    */
+    path.match(
+      (node) => node.type === "TypeAnnotation",
+      (node, key) => key === "typeAnnotation" && node.type === "Identifier",
+      (node, key) => key === "id" && node.type === "DeclareHook",
+    ) ||
+    /*
+    Flow
 
     ```js
     type A = () => infer R extends string;
@@ -552,7 +569,10 @@ function printTypeQuery({ node }, print) {
   const argumentPropertyName =
     node.type === "TSTypeQuery" ? "exprName" : "argument";
   const typeArgsPropertyName =
-    node.type === "TSTypeQuery" ? "typeParameters" : "typeArguments";
+    // TODO: Use `typeArguments` only when babel align with TS.
+    node.type === "TypeofTypeAnnotation" || node.typeArguments
+      ? "typeArguments"
+      : "typeParameters";
   return ["typeof ", print(argumentPropertyName), print(typeArgsPropertyName)];
 }
 

@@ -1,9 +1,8 @@
 /**
- * @typedef {import("../../document/builders.js").Doc} Doc
+ * @import {Doc} from "../../document/builders.js"
  */
 
 import assert from "node:assert";
-
 import {
   hardline,
   indent,
@@ -63,12 +62,15 @@ function printClosingTagSuffix(node, options) {
   return needsToBorrowParentClosingTagStartMarker(node)
     ? printClosingTagStartMarker(node.parent, options)
     : needsToBorrowNextOpeningTagStartMarker(node)
-      ? printOpeningTagStartMarker(node.next)
+      ? printOpeningTagStartMarker(node.next, options)
       : "";
 }
 
 function printClosingTagStartMarker(node, options) {
-  assert(!node.isSelfClosing);
+  /* c8 ignore next 3 */
+  if (process.env.NODE_ENV !== "production") {
+    assert.ok(!node.isSelfClosing);
+  }
   /* c8 ignore next 3 */
   if (shouldNotPrintClosingTag(node, options)) {
     return "";
@@ -190,7 +192,7 @@ function needsToBorrowNextOpeningTagStartMarker(node) {
 }
 
 function getPrettierIgnoreAttributeCommentData(value) {
-  const match = value.trim().match(/^prettier-ignore-attribute(?:\s+(.+))?$/s);
+  const match = value.trim().match(/^prettier-ignore-attribute(?:\s+(.+))?$/su);
 
   if (!match) {
     return false;
@@ -200,7 +202,7 @@ function getPrettierIgnoreAttributeCommentData(value) {
     return true;
   }
 
-  return match[1].split(/\s+/);
+  return match[1].split(/\s+/u);
 }
 
 function needsToBorrowParentOpeningTagEndMarker(node) {
@@ -326,7 +328,10 @@ function printOpeningTag(path, options, print) {
 function printOpeningTagStart(node, options) {
   return node.prev && needsToBorrowNextOpeningTagStartMarker(node.prev)
     ? ""
-    : [printOpeningTagPrefix(node, options), printOpeningTagStartMarker(node)];
+    : [
+        printOpeningTagPrefix(node, options),
+        printOpeningTagStartMarker(node, options),
+      ];
 }
 
 function printOpeningTagPrefix(node, options) {
@@ -337,7 +342,8 @@ function printOpeningTagPrefix(node, options) {
       : "";
 }
 
-function printOpeningTagStartMarker(node) {
+const HTML5_DOCTYPE_START_MARKER = "<!doctype";
+function printOpeningTagStartMarker(node, options) {
   switch (node.type) {
     case "ieConditionalComment":
     case "ieConditionalStartComment":
@@ -346,8 +352,22 @@ function printOpeningTagStartMarker(node) {
       return "<!--<!";
     case "interpolation":
       return "{{";
-    case "docType":
-      return node.value === "html" ? "<!doctype" : "<!DOCTYPE";
+    case "docType": {
+      // Only lowercase HTML5 doctype in `.html` and `.htm` files
+      if (node.value === "html") {
+        const { filepath } = options;
+        if (filepath && /\.html?$/u.test(filepath)) {
+          return HTML5_DOCTYPE_START_MARKER;
+        }
+      }
+
+      const start = locStart(node);
+      return options.originalText.slice(
+        start,
+        start + HTML5_DOCTYPE_START_MARKER.length,
+      );
+    }
+
     case "angularIcuExpression":
       return "{";
     case "element":
@@ -361,7 +381,10 @@ function printOpeningTagStartMarker(node) {
 }
 
 function printOpeningTagEndMarker(node) {
-  assert(!node.isSelfClosing);
+  /* c8 ignore next 3 */
+  if (process.env.NODE_ENV !== "production") {
+    assert.ok(!node.isSelfClosing);
+  }
   switch (node.type) {
     case "ieConditionalComment":
       return "]>";
@@ -384,7 +407,6 @@ export {
   printClosingTag,
   printClosingTagEnd,
   printClosingTagEndMarker,
-  printClosingTagStart,
   printClosingTagStartMarker,
   printClosingTagSuffix,
   printOpeningTag,

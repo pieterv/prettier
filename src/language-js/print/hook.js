@@ -7,8 +7,8 @@ import {
 import { printDeclareToken } from "./misc.js";
 
 /**
- * @typedef {import("../../common/ast-path.js").default} AstPath
- * @typedef {import("../../document/builders.js").Doc} Doc
+ * @import AstPath from "../../common/ast-path.js"
+ * @import {Doc} from "../../document/builders.js"
  */
 
 /*
@@ -17,7 +17,7 @@ import { printDeclareToken } from "./misc.js";
 function printHook(path, options, print) {
   const { node } = path;
 
-  /** @type {Doc[]} */
+  /** @type {Array<Doc>} */
   const parts = ["hook"];
   if (node.id) {
     parts.push(" ", print("id"));
@@ -25,8 +25,8 @@ function printHook(path, options, print) {
 
   const parametersDoc = printFunctionParameters(
     path,
-    print,
     options,
+    print,
     false,
     true,
   );
@@ -90,8 +90,8 @@ function printHookTypeAnnotation(path, options, print) {
 
   let parametersDoc = printFunctionParameters(
     path,
-    print,
     options,
+    print,
     /* expandArg */ false,
     /* printTypeParams */ true,
   );

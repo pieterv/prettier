@@ -1,4 +1,4 @@
-/** @typedef {import("../document/builders.js").Doc} Doc */
+/** @import {Doc} from "../document/builders.js" */
 
 import {
   breakParent,
@@ -255,7 +255,7 @@ function printNode(path, options, print) {
 
       if (
         (node.type === "quoteSingle" && raw.includes("\\")) ||
-        (node.type === "quoteDouble" && /\\[^"]/.test(raw))
+        (node.type === "quoteDouble" && /\\[^"]/u.test(raw))
       ) {
         // only quoteDouble can use escape chars
         // and quoteSingle do not need to escape backslashes
@@ -276,7 +276,7 @@ function printNode(path, options, print) {
             node.type === "quoteDouble"
               ? raw
                   // double quote needs to be escaped by backslash in quoteDouble
-                  .replaceAll('\\"', doubleQuote)
+                  .replaceAll(String.raw`\"`, doubleQuote)
                   .replaceAll("'", singleQuote.repeat(2))
               : raw,
             options,
@@ -305,7 +305,7 @@ function printNode(path, options, print) {
     }
     case "blockFolded":
     case "blockLiteral":
-      return printBlock(path, print, options);
+      return printBlock(path, options, print);
 
     case "mapping":
     case "sequence":
@@ -317,12 +317,12 @@ function printNode(path, options, print) {
       return !node.content ? "" : print("content");
     case "mappingItem":
     case "flowMappingItem":
-      return printMappingItem(path, print, options);
+      return printMappingItem(path, options, print);
 
     case "flowMapping":
-      return printFlowMapping(path, print, options);
+      return printFlowMapping(path, options, print);
     case "flowSequence":
-      return printFlowSequence(path, print, options);
+      return printFlowSequence(path, options, print);
     case "flowSequenceItem":
       return print("content");
     default:
@@ -365,7 +365,7 @@ function shouldPrintDocumentHeadEndMarker(path, options) {
      * preserve the first document head end marker
      */
     (path.isFirst &&
-      /---(?:\s|$)/.test(
+      /---(?:\s|$)/u.test(
         options.originalText.slice(locStart(document), locStart(document) + 4),
       )) ||
     /**

@@ -1,6 +1,5 @@
 import printNumber from "../../utils/print-number.js";
 import printString from "../../utils/print-string.js";
-import { maybeToLowerCase } from "../utils/index.js";
 import CSS_UNITS from "./css-units.evaluate.js";
 
 function printUnit(unit) {
@@ -8,10 +7,10 @@ function printUnit(unit) {
   return CSS_UNITS.has(lowercased) ? CSS_UNITS.get(lowercased) : unit;
 }
 
-const STRING_REGEX = /(["'])(?:(?!\1)[^\\]|\\.)*\1/gs;
-const NUMBER_REGEX = /(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?/gi;
-const STANDARD_UNIT_REGEX = /[a-z]+/gi;
-const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
+const STRING_REGEX = /(["'])(?:(?!\1)[^\\]|\\.)*\1/gsu;
+const NUMBER_REGEX = /(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?/giu;
+const STANDARD_UNIT_REGEX = /[a-z]+/giu;
+const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/giu;
 const ADJUST_NUMBERS_REGEX = new RegExp(
   STRING_REGEX.source +
     "|" +
@@ -19,7 +18,7 @@ const ADJUST_NUMBERS_REGEX = new RegExp(
     `(${WORD_PART_REGEX.source})?` +
     `(${NUMBER_REGEX.source})` +
     `(${STANDARD_UNIT_REGEX.source})?`,
-  "gi",
+  "giu",
 );
 
 function adjustStrings(value, options) {
@@ -36,10 +35,23 @@ function quoteAttributeValue(value, options) {
 function adjustNumbers(value) {
   return value.replaceAll(
     ADJUST_NUMBERS_REGEX,
-    (match, quote, wordPart, number, unit) =>
-      !wordPart && number
-        ? printCssNumber(number) + maybeToLowerCase(unit || "")
-        : match,
+    (match, quote, wordPart, number, unit) => {
+      if (!wordPart && number) {
+        unit ??= "";
+        unit = unit.toLowerCase();
+
+        if (
+          !unit ||
+          // `2n + 1`
+          unit === "n" ||
+          CSS_UNITS.has(unit)
+        ) {
+          return printCssNumber(number) + (unit ? printUnit(unit) : "");
+        }
+      }
+
+      return match;
+    },
   );
 }
 
@@ -47,7 +59,7 @@ function printCssNumber(rawNumber) {
   return (
     printNumber(rawNumber)
       // Remove trailing `.0`.
-      .replace(/\.0(?=$|e)/, "")
+      .replace(/\.0(?=$|e)/u, "")
   );
 }
 

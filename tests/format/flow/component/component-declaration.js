@@ -8,6 +8,10 @@ component MyComponent() {
   return <OtherComponent />;
 }
 
+component MyComponent(a: string, b: number) renders SomeComponent {
+  return <OtherComponent />;
+}
+
 export component MyComponent() {}
 
 export default component MyComponent() {}

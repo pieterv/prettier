@@ -10,12 +10,12 @@ export default function getCodeSamples(parser) {
         "  if(!greeting){return null};",
         "",
         "     // TODO: Don't use random in render",
-        '  let num = Math.floor (Math.random() * 1E+7).toString().replace(/\\.\\d+/ig, "")',
+        String.raw`  let num = Math.floor (Math.random() * 1E+7).toString().replace(/\.\d+/ig, "")`,
         "",
         "  return <div className='HelloWorld' title={`You are visitor number ${ num }`} onMouseOver={onMouseOver}>",
         "",
         "    <strong>{ greeting.slice( 0, 1 ).toUpperCase() + greeting.slice(1).toLowerCase() }</strong>",
-        '    {greeting.endsWith(",") ? " " : <span style={{color: \'\\grey\'}}>", "</span> }',
+        String.raw`    {greeting.endsWith(",") ? " " : <span style={{color: '\grey'}}>", "</span> }`,
         "    <em>",
         "\t{ greeted }",
         "\t</em>",
@@ -28,6 +28,7 @@ export default function getCodeSamples(parser) {
         "}",
       ].join("\n");
     case "flow":
+    case "hermes":
     case "babel-flow":
       return [
         "declare export function graphql<Props, Variables, Component: React$ComponentType<Props>>",
@@ -308,6 +309,18 @@ export default function getCodeSamples(parser) {
         '    <SCRIPT src="https://www.google-analytics.com/analytics.js" ASYNC DEFER></SCRIPT>',
         "  </body>",
         "</HTML>",
+      ].join("\n");
+    case "mjml":
+      return [
+        "<mjml> <mj-body>",
+        "    <mj-section>",
+        "      <mj-column>",
+        "<mj-text> Hello World!",
+        "        </mj-text>",
+        "      </mj-column>",
+        "    </mj-section>",
+        "  </mj-body>",
+        "  </mjml>",
       ].join("\n");
     case "doc-explorer":
       return [

@@ -8,7 +8,7 @@ import {
 } from "../utils/index.js";
 import { printBinaryishExpression } from "./binaryish.js";
 
-/** @typedef {import("../../common/ast-path.js").default} AstPath */
+/** @import AstPath from "../../common/ast-path.js" */
 
 function printAngular(path, options, print) {
   const { node } = path;
@@ -49,7 +49,7 @@ function printAngular(path, options, print) {
         "body",
       );
     case "NGMicrosyntaxKey":
-      return /^[$_a-z][\w$]*(?:-[$_a-z][\w$])*$/i.test(node.name)
+      return /^[$_a-z][\w$]*(?:-[$_a-z][\w$])*$/iu.test(node.name)
         ? node.name
         : JSON.stringify(node.name);
     case "NGMicrosyntaxExpression":
@@ -62,11 +62,12 @@ function printAngular(path, options, print) {
       // https://github.com/prettier/angular-estree-parser/issues/267
       const shouldNotPrintColon =
         isNgForOf(path) ||
+        isNgForOfTrack(path) ||
         (((index === 1 &&
           (node.key.name === "then" ||
             node.key.name === "else" ||
             node.key.name === "as")) ||
-          ((index === 2 || index === 3) &&
+          (index === 2 &&
             ((node.key.name === "else" &&
               parent.body[index - 1].type === "NGMicrosyntaxKeyedExpression" &&
               parent.body[index - 1].key.name === "then") ||
@@ -97,6 +98,16 @@ function isNgForOf({ node, index }) {
     node.type === "NGMicrosyntaxKeyedExpression" &&
     node.key.name === "of" &&
     index === 1
+  );
+}
+
+function isNgForOfTrack(path) {
+  const { node } = path;
+  return (
+    path.parent.body[1].key.name === "of" &&
+    node.type === "NGMicrosyntaxKeyedExpression" &&
+    node.key.name === "track" &&
+    node.key.type === "NGMicrosyntaxKey"
   );
 }
 

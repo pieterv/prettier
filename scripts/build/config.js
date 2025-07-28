@@ -765,7 +765,7 @@ const universalFiles = [...nonPluginUniversalFiles, ...pluginFiles].flatMap(
         kind: "javascript",
         playground: output.format === "esm" && outputBaseName !== "doc",
       })),
-      getTypesFileConfig({ input, outputBaseName, isPlugin }),
+      // getTypesFileConfig({ input, outputBaseName, isPlugin }),
     ];
   },
 );
@@ -948,166 +948,166 @@ export default [
     distDirectory: path.join(DIST_DIR, "prettier"),
     files,
   },
-  {
-    packageName: "@prettier/plugin-oxc",
-    distDirectory: path.join(DIST_DIR, "plugin-oxc"),
-    files: [
-      ...[
-        {
-          input: "packages/plugin-oxc/index.js",
-          addDefaultExport: true,
-          external: ["oxc-parser"],
-        },
-      ].flatMap((file) => {
-        let { input, output, outputBaseName, ...buildOptions } = file;
+  // {
+  //   packageName: "@prettier/plugin-oxc",
+  //   distDirectory: path.join(DIST_DIR, "plugin-oxc"),
+  //   files: [
+  //     ...[
+  //       {
+  //         input: "packages/plugin-oxc/index.js",
+  //         addDefaultExport: true,
+  //         external: ["oxc-parser"],
+  //       },
+  //     ].flatMap((file) => {
+  //       let { input, output, outputBaseName, ...buildOptions } = file;
 
-        const format = input.endsWith(".cjs") ? "cjs" : "esm";
-        outputBaseName ??= path.basename(input, path.extname(input));
+  //       const format = input.endsWith(".cjs") ? "cjs" : "esm";
+  //       outputBaseName ??= path.basename(input, path.extname(input));
 
-        return [
-          {
-            input,
-            output: {
-              format,
-              file: `${outputBaseName}${extensions[format]}`,
-            },
-            platform: "node",
-            buildOptions,
-            build: buildJavascriptModule,
-            kind: "javascript",
-          },
-          getTypesFileConfig({ input, outputBaseName, isPlugin: true }),
-        ];
-      }),
-      ...[
-        {
-          input: "packages/plugin-oxc/package.json",
-          output: {
-            file: "package.json",
-            format: "json",
-          },
-          build: buildPluginOxcPackageJson,
-        },
-        {
-          input: "packages/plugin-oxc/README.md",
-          output: {
-            file: "README.md",
-          },
-          build: copyFileBuilder,
-        },
-        {
-          input: "LICENSE",
-          output: {
-            file: "LICENSE",
-          },
-          build: copyFileBuilder,
-        },
-        {
-          output: {
-            file: "THIRD-PARTY-NOTICES.md",
-          },
-          build: buildDependenciesLicense,
-        },
-      ].map((file) => ({
-        ...file,
-        output: { file: file.input, ...file.output },
-        kind: "meta",
-      })),
-    ],
-  },
-  {
-    packageName: "@prettier/plugin-hermes",
-    distDirectory: path.join(DIST_DIR, "plugin-hermes"),
-    files: [
-      ...[
-        {
-          input: "packages/plugin-hermes/index.js",
-          addDefaultExport: true,
-          replaceModule: [
-            {
-              module: require.resolve("hermes-parser/dist/HermesParser.js"),
-              process(text) {
-                text =
-                  'const Buffer = globalThis.Buffer ?? require("buffer/").Buffer;' +
-                  text;
-                return text;
-              },
-            },
-            {
-              module: require.resolve("hermes-parser/dist/HermesParserWASM.js"),
-              process(text) {
-                text = text.replaceAll("process.argv", "[]");
-                text = text.replaceAll('require("fs")', "undefined");
-                text = text.replaceAll('require("path")', "undefined");
-                text =
-                  'const Buffer = globalThis.Buffer ?? require("buffer/").Buffer;' +
-                  text;
+  //       return [
+  //         {
+  //           input,
+  //           output: {
+  //             format,
+  //             file: `${outputBaseName}${extensions[format]}`,
+  //           },
+  //           platform: "node",
+  //           buildOptions,
+  //           build: buildJavascriptModule,
+  //           kind: "javascript",
+  //         },
+  //         getTypesFileConfig({ input, outputBaseName, isPlugin: true }),
+  //       ];
+  //     }),
+  //     ...[
+  //       {
+  //         input: "packages/plugin-oxc/package.json",
+  //         output: {
+  //           file: "package.json",
+  //           format: "json",
+  //         },
+  //         build: buildPluginOxcPackageJson,
+  //       },
+  //       {
+  //         input: "packages/plugin-oxc/README.md",
+  //         output: {
+  //           file: "README.md",
+  //         },
+  //         build: copyFileBuilder,
+  //       },
+  //       {
+  //         input: "LICENSE",
+  //         output: {
+  //           file: "LICENSE",
+  //         },
+  //         build: copyFileBuilder,
+  //       },
+  //       {
+  //         output: {
+  //           file: "THIRD-PARTY-NOTICES.md",
+  //         },
+  //         build: buildDependenciesLicense,
+  //       },
+  //     ].map((file) => ({
+  //       ...file,
+  //       output: { file: file.input, ...file.output },
+  //       kind: "meta",
+  //     })),
+  //   ],
+  // },
+  // {
+  //   packageName: "@prettier/plugin-hermes",
+  //   distDirectory: path.join(DIST_DIR, "plugin-hermes"),
+  //   files: [
+  //     ...[
+  //       {
+  //         input: "packages/plugin-hermes/index.js",
+  //         addDefaultExport: true,
+  //         replaceModule: [
+  //           {
+  //             module: require.resolve("hermes-parser/dist/HermesParser.js"),
+  //             process(text) {
+  //               text =
+  //                 'const Buffer = globalThis.Buffer ?? require("buffer/").Buffer;' +
+  //                 text;
+  //               return text;
+  //             },
+  //           },
+  //           {
+  //             module: require.resolve("hermes-parser/dist/HermesParserWASM.js"),
+  //             process(text) {
+  //               text = text.replaceAll("process.argv", "[]");
+  //               text = text.replaceAll('require("fs")', "undefined");
+  //               text = text.replaceAll('require("path")', "undefined");
+  //               text =
+  //                 'const Buffer = globalThis.Buffer ?? require("buffer/").Buffer;' +
+  //                 text;
 
-                return text;
-              },
-            },
-          ],
-        },
-      ].flatMap((file) => {
-        let { input, output, outputBaseName, ...buildOptions } = file;
+  //               return text;
+  //             },
+  //           },
+  //         ],
+  //       },
+  //     ].flatMap((file) => {
+  //       let { input, output, outputBaseName, ...buildOptions } = file;
 
-        outputBaseName ??= path.basename(input, path.extname(input));
-        const format = input.endsWith(".cjs") ? "cjs" : "esm";
+  //       outputBaseName ??= path.basename(input, path.extname(input));
+  //       const format = input.endsWith(".cjs") ? "cjs" : "esm";
 
-        return [
-          {
-            input,
-            output: {
-              format,
-              file: `${outputBaseName}${extensions[format]}`,
-            },
-            platform: "universal",
-            buildOptions: {
-              addDefaultExport: true,
-              ...buildOptions,
-            },
-            isPlugin: true,
-            build: buildJavascriptModule,
-            playground: true,
-            kind: "javascript",
-          },
-          getTypesFileConfig({ input, outputBaseName, isPlugin: true }),
-        ];
-      }),
-      ...[
-        {
-          input: "packages/plugin-hermes/package.json",
-          output: {
-            file: "package.json",
-            format: "json",
-          },
-          build: buildPluginHermesPackageJson,
-        },
-        {
-          input: "packages/plugin-hermes/README.md",
-          output: {
-            file: "README.md",
-          },
-          build: copyFileBuilder,
-        },
-        {
-          input: "LICENSE",
-          output: {
-            file: "LICENSE",
-          },
-          build: copyFileBuilder,
-        },
-        {
-          output: {
-            file: "THIRD-PARTY-NOTICES.md",
-          },
-          build: buildDependenciesLicense,
-        },
-      ].map((file) => ({
-        ...file,
-        output: { file: file.input, ...file.output },
-        kind: "meta",
-      })),
-    ],
-  },
+  //       return [
+  //         {
+  //           input,
+  //           output: {
+  //             format,
+  //             file: `${outputBaseName}${extensions[format]}`,
+  //           },
+  //           platform: "universal",
+  //           buildOptions: {
+  //             addDefaultExport: true,
+  //             ...buildOptions,
+  //           },
+  //           isPlugin: true,
+  //           build: buildJavascriptModule,
+  //           playground: true,
+  //           kind: "javascript",
+  //         },
+  //         getTypesFileConfig({ input, outputBaseName, isPlugin: true }),
+  //       ];
+  //     }),
+  //     ...[
+  //       {
+  //         input: "packages/plugin-hermes/package.json",
+  //         output: {
+  //           file: "package.json",
+  //           format: "json",
+  //         },
+  //         build: buildPluginHermesPackageJson,
+  //       },
+  //       {
+  //         input: "packages/plugin-hermes/README.md",
+  //         output: {
+  //           file: "README.md",
+  //         },
+  //         build: copyFileBuilder,
+  //       },
+  //       {
+  //         input: "LICENSE",
+  //         output: {
+  //           file: "LICENSE",
+  //         },
+  //         build: copyFileBuilder,
+  //       },
+  //       {
+  //         output: {
+  //           file: "THIRD-PARTY-NOTICES.md",
+  //         },
+  //         build: buildDependenciesLicense,
+  //       },
+  //     ].map((file) => ({
+  //       ...file,
+  //       output: { file: file.input, ...file.output },
+  //       kind: "meta",
+  //     })),
+  //   ],
+  // },
 ];

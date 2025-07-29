@@ -1,6 +1,10 @@
 import path from "node:path";
-
-import { DIST_DIR, PROJECT_ROOT, readJson, writeJson } from "../utils/index.js";
+import {
+  PRODUCTION_MINIMAL_NODE_JS_VERSION,
+  PROJECT_ROOT,
+  readJson,
+  writeJson,
+} from "../utils/index.js";
 
 const keysToKeep = [
   "name",
@@ -21,7 +25,13 @@ const keysToKeep = [
   "preferUnplugged",
 ];
 
-async function buildPackageJson({ file, files }) {
+const publishConfig = {
+  access: "public",
+  registry: "https://registry.npmjs.org/",
+};
+
+async function buildPrettierPackageJson({ packageConfig, file }) {
+  const { distDirectory, files } = packageConfig;
   const packageJson = await readJson(path.join(PROJECT_ROOT, file.input));
 
   const bin = files.find(
@@ -36,9 +46,10 @@ async function buildPackageJson({ file, files }) {
     engines: {
       ...packageJson.engines,
       // https://github.com/prettier/prettier/pull/13118#discussion_r922708068
-      // Don't delete, comment out if we don't want override
-      node: ">=14",
+      // Don't delete, event it's the same in package.json
+      node: `>=${PRODUCTION_MINIMAL_NODE_JS_VERSION}`,
     },
+    type: "commonjs",
     exports: {
       ".": {
         types: "./index.d.ts",
@@ -58,9 +69,11 @@ async function buildPackageJson({ file, files }) {
             return [
               file.isPlugin ? `./plugins/${basename}` : `./${basename}`,
               {
-                types: `./${file.output.file.replace(/\.js$/, ".d.ts")}`,
+                types: `./${file.output.file.replace(/\.js$/u, ".d.ts")}`,
+                // `module-sync` condition can prevent CJS plugins from working: https://github.com/prettier/prettier/issues/17139
+                // Perform a test before re-adding it.
                 require: `./${file.output.file}`,
-                default: `./${file.output.file.replace(/\.js$/, ".mjs")}`,
+                default: `./${file.output.file.replace(/\.js$/u, ".mjs")}`,
               },
             ];
           }),
@@ -86,7 +99,7 @@ async function buildPackageJson({ file, files }) {
               [`./parser-${basename}.js`, `./${file.output.file}`],
               [
                 `./esm/parser-${basename}.mjs`,
-                `./${file.output.file.replace(/\.js$/, ".mjs")}`,
+                `./${file.output.file.replace(/\.js$/u, ".mjs")}`,
               ],
             ];
           }),
@@ -100,7 +113,59 @@ async function buildPackageJson({ file, files }) {
   };
 
   await writeJson(
-    path.join(DIST_DIR, file.output.file),
+    path.join(distDirectory, file.output.file),
+    Object.assign(pick(packageJson, keysToKeep), overrides),
+  );
+}
+
+async function buildPluginOxcPackageJson({ packageConfig, file }) {
+  const { distDirectory, files } = packageConfig;
+  const packageJson = await readJson(path.join(PROJECT_ROOT, file.input));
+  const projectPackageJson = await readJson(
+    path.join(PROJECT_ROOT, "package.json"),
+  );
+
+  const overrides = {
+    engines: {
+      ...packageJson.engines,
+      // https://github.com/prettier/prettier/pull/13118#discussion_r922708068
+      // Don't delete, event it's the same in package.json
+      node: `>=${PRODUCTION_MINIMAL_NODE_JS_VERSION}`,
+    },
+    // Use `commonjs` since we may provide browser build in future.
+    type: "commonjs",
+    files: files.map(({ output: { file } }) => file).sort(),
+    dependencies: {
+      "oxc-parser": projectPackageJson.dependencies["oxc-parser"],
+    },
+    publishConfig,
+  };
+
+  await writeJson(
+    path.join(distDirectory, file.output.file),
+    Object.assign(pick(packageJson, keysToKeep), overrides),
+  );
+}
+
+async function buildPluginHermesPackageJson({ packageConfig, file }) {
+  const { distDirectory, files } = packageConfig;
+  const packageJson = await readJson(path.join(PROJECT_ROOT, file.input));
+
+  const overrides = {
+    engines: {
+      ...packageJson.engines,
+      // https://github.com/prettier/prettier/pull/13118#discussion_r922708068
+      // Don't delete, event it's the same in package.json
+      node: `>=${PRODUCTION_MINIMAL_NODE_JS_VERSION}`,
+    },
+    // Use `commonjs` since we may provide browser build in future.
+    type: "commonjs",
+    files: files.map(({ output: { file } }) => file).sort(),
+    publishConfig,
+  };
+
+  await writeJson(
+    path.join(distDirectory, file.output.file),
     Object.assign(pick(packageJson, keysToKeep), overrides),
   );
 }
@@ -112,4 +177,8 @@ function pick(object, keys) {
   );
 }
 
-export default buildPackageJson;
+export {
+  buildPluginHermesPackageJson,
+  buildPluginOxcPackageJson,
+  buildPrettierPackageJson,
+};

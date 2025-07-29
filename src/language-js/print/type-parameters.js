@@ -20,11 +20,15 @@ import {
   shouldPrintComma,
 } from "../utils/index.js";
 import { isArrowFunctionVariableDeclarator } from "./assignment.js";
-import { printTypeScriptMappedTypeModifier } from "./mapped-type.js";
 import {
   printTypeAnnotationProperty,
   shouldHugType,
 } from "./type-annotation.js";
+
+/**
+ * @import {Doc} from "../../document/builders.js"
+ * @import AstPath from "../../common/ast-path.js"
+ */
 
 const getTypeParametersGroupId = createGroupIdMapper("typeParameters");
 
@@ -38,10 +42,13 @@ function shouldForceTrailingComma(path, options, paramsKey) {
     node.type.startsWith("TS") &&
     !node[paramsKey][0].constraint &&
     path.parent.type === "ArrowFunctionExpression" &&
-    !(options.filepath && /\.ts$/.test(options.filepath))
+    !(options.filepath && /\.ts$/u.test(options.filepath))
   );
 }
 
+/**
+ * @param {AstPath} path
+ */
 function printTypeParameters(path, options, print, paramsKey) {
   const { node } = path;
 
@@ -54,8 +61,7 @@ function printTypeParameters(path, options, print, paramsKey) {
     return print(paramsKey);
   }
 
-  const grandparent = path.getNode(2);
-  const isParameterInTestCall = grandparent && isTestCall(grandparent);
+  const isParameterInTestCall = isTestCall(path.grandparent);
 
   const isArrowFunctionVariable = path.match(
     (node) =>
@@ -120,35 +126,14 @@ function printDanglingCommentsForInline(path, options) {
 }
 
 function printTypeParameter(path, options, print) {
-  const { node, parent } = path;
+  const { node } = path;
 
   /**
-   * @type {import("../../document/builders.js").Doc[]}
+   * @type {Doc[]}
    */
   const parts = [node.const ? "const " : ""];
 
   const name = node.type === "TSTypeParameter" ? print("name") : node.name;
-
-  if (parent.type === "TSMappedType") {
-    if (parent.readonly) {
-      parts.push(
-        printTypeScriptMappedTypeModifier(parent.readonly, "readonly"),
-        " ",
-      );
-    }
-    parts.push("[", name);
-    if (node.constraint) {
-      parts.push(" in ", print("constraint"));
-    }
-    if (parent.nameType) {
-      parts.push(
-        " as ",
-        path.callParent(() => print("nameType")),
-      );
-    }
-    parts.push("]");
-    return parts;
-  }
 
   if (node.variance) {
     parts.push(print("variance"));

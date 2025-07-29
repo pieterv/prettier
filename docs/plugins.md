@@ -15,7 +15,11 @@ You can load plugins with:
   prettier --write main.foo --plugin=prettier-plugin-foo
   ```
 
-  > Tip: You can set `--plugin` options multiple times.
+  :::tip
+
+  You can set `--plugin` options multiple times.
+
+  :::
 
 - The [API](api.md), via the `plugins` options:
 
@@ -66,7 +70,7 @@ Strings provided to `plugins` are ultimately passed to [`import()` expression](h
 - [`prettier-plugin-sql-cst`](https://github.com/nene/prettier-plugin-sql-cst) by [**@nene**](https://github.com/nene)
 - [`prettier-plugin-solidity`](https://github.com/prettier-solidity/prettier-plugin-solidity) by [**@mattiaerre**](https://github.com/mattiaerre)
 - [`prettier-plugin-svelte`](https://github.com/sveltejs/prettier-plugin-svelte) by [**@sveltejs**](https://github.com/sveltejs)
-- [`prettier-plugin-toml`](https://github.com/bd82/toml-tools/tree/master/packages/prettier-plugin-toml) by [**@bd82**](https://github.com/bd82)
+- [`prettier-plugin-toml`](https://github.com/un-ts/prettier/tree/master/packages/toml) by [**@JounQin**](https://github.com/JounQin) and [**@so1ve**](https://github.com/so1ve)
 
 ## Developing Plugins
 
@@ -106,9 +110,10 @@ The key must match the name in the `parsers` array from `languages`. The value c
 export const parsers = {
   "dance-parse": {
     parse,
-    // The name of the AST that
+    // The name of the AST that the parser produces.
     astFormat: "dance-ast",
     hasPragma,
+    hasIgnorePragma,
     locStart,
     locEnd,
     preprocess,
@@ -132,6 +137,12 @@ _(Optional)_ The pragma detection function (`hasPragma`) should return if the te
 
 ```ts
 function hasPragma(text: string): boolean;
+```
+
+_(Optional)_ The "ignore pragma" detection function (`hasIgnorePragma`) should return if the text contains a pragma indicating the text should not be formatted.
+
+```ts
+function hasIgnorePragma(text: string): boolean;
 ```
 
 _(Optional)_ The preprocess function can process the input text before passing into `parse` function.
@@ -202,7 +213,7 @@ function print(
 
 The `print` function is passed the following parameters:
 
-- **`path`**: An object, which can be used to access nodes in the AST. It’s a stack-like data structure that maintains the current state of the recursion. It is called “path” because it represents the path to the current node from the root of the AST. The current node is returned by `path.getValue()`.
+- **`path`**: An object, which can be used to access nodes in the AST. It’s a stack-like data structure that maintains the current state of the recursion. It is called “path” because it represents the path to the current node from the root of the AST. The current node is returned by `path.node`.
 - **`options`**: A persistent object, which contains global options and which a plugin may mutate to store contextual data.
 - **`print`**: A callback for printing sub-nodes. This function contains the core printing logic that consists of steps whose implementation is provided by plugins. In particular, it calls the printer’s `print` function and passes itself to it. Thus, the two `print` functions – the one from the core and the one from the plugin – call each other while descending down the AST recursively.
 
@@ -214,7 +225,7 @@ import { doc } from "prettier";
 const { group, indent, join, line, softline } = doc.builders;
 
 function print(path, options, print) {
-  const node = path.getValue();
+  const node = path.node;
 
   switch (node.type) {
     case "list":
@@ -281,7 +292,7 @@ For example, a plugin that has nodes with embedded JavaScript might have the fol
 
 ```js
 function embed(path, options) {
-  const node = path.getValue();
+  const node = path.node;
   if (node.type === "javascript") {
     return async (textToDoc) => {
       return [
@@ -589,6 +600,11 @@ function hasSpaces(
   startIndex: number,
   options?: SkipOptions,
 ): boolean;
+
+function getPreferredQuote(
+  text: string,
+  preferredQuoteOrPreferSingleQuote: Quote | boolean,
+): Quote;
 
 function makeString(
   rawText: string,

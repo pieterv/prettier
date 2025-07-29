@@ -8,7 +8,6 @@ import {
   TagContentType,
   visitAll,
 } from "angular-html-parser";
-
 import createError from "../common/parser-create-error.js";
 import parseFrontMatter from "../utils/front-matter/parse.js";
 import inferParser from "../utils/infer-parser.js";
@@ -16,19 +15,20 @@ import isNonEmptyArray from "../utils/is-non-empty-array.js";
 import { Node } from "./ast.js";
 import { parseIeConditionalComment } from "./conditional-comment.js";
 import { locEnd, locStart } from "./loc.js";
-import { hasPragma } from "./pragma.js";
+import { hasIgnorePragma, hasPragma } from "./pragma.js";
 import HTML_ELEMENT_ATTRIBUTES from "./utils/html-elements-attributes.evaluate.js";
-import HTML_TAGS from "./utils/html-tag-names.evaluate.js";
+import HTML_TAGS from "./utils/html-tags.evaluate.js";
 import isUnknownNamespace from "./utils/is-unknown-namespace.js";
 
 /**
- * @typedef {import('angular-html-parser')} AngularHtmlParser
- * @typedef {import('angular-html-parser/lib/compiler/src/ml_parser/ast.js').Node} AstNode
- * @typedef {import('angular-html-parser/lib/compiler/src/ml_parser/ast.js').Attribute} Attribute
- * @typedef {import('angular-html-parser/lib/compiler/src/ml_parser/ast.js').Element} Element
- * @typedef {import('angular-html-parser/lib/compiler/src/ml_parser/parser.js').ParseTreeResult} ParserTreeResult
- * @typedef {import('angular-html-parser').ParseOptions & {
- *   name: 'html' | 'angular' | 'vue' | 'lwc';
+ * @import AngularHtmlParser, {ParseOptions as AngularHtmlParserParseOptions} from "angular-html-parser"
+ * @import {Node as AstNode, Attribute, Element} from "angular-html-parser/lib/compiler/src/ml_parser/ast.js"
+ * @import {ParseTreeResult} from "angular-html-parser/lib/compiler/src/ml_parser/parser.js"
+ */
+
+/**
+ * @typedef {AngularHtmlParserParseOptions & {
+ *   name: 'html' | 'angular' | 'vue' | 'lwc' | 'mjml';
  *   normalizeTagName?: boolean;
  *   normalizeAttributeName?: boolean;
  *   shouldParseAsRawText?: (tagName: string, prefix: string, hasParent: boolean, attrs: Array<{
@@ -46,7 +46,7 @@ function normalizeAngularControlFlowBlock(node) {
     return;
   }
 
-  node.name = node.name.toLowerCase().replaceAll(/\s+/g, " ").trim();
+  node.name = node.name.toLowerCase().replaceAll(/\s+/gu, " ").trim();
   node.type = "angularControlFlowBlock";
 
   if (!isNonEmptyArray(node.parameters)) {
@@ -66,6 +66,24 @@ function normalizeAngularControlFlowBlock(node) {
       node.parameters.at(-1).sourceSpan.end,
     ),
   };
+}
+
+function normalizeAngularLetDeclaration(node) {
+  if (node.type !== "letDeclaration") {
+    return;
+  }
+
+  // Similar to `VariableDeclarator` in estree
+  node.type = "angularLetDeclaration";
+  node.id = node.name;
+  node.init = {
+    type: "angularLetDeclarationInitializer",
+    sourceSpan: new ParseSourceSpan(node.valueSpan.start, node.valueSpan.end),
+    value: node.value,
+  };
+
+  delete node.name;
+  delete node.value;
 }
 
 function normalizeAngularIcuExpression(node) {
@@ -103,6 +121,7 @@ function ngHtmlParser(input, parseOptions, options) {
           shouldParseAsRawText(...args) ? TagContentType.RAW_TEXT : undefined
       : undefined,
     tokenizeAngularBlocks: name === "angular" ? true : undefined,
+    tokenizeAngularLetDeclaration: name === "angular" ? true : undefined,
   });
 
   if (name === "vue") {
@@ -117,7 +136,7 @@ function ngHtmlParser(input, parseOptions, options) {
       return ngHtmlParser(input, HTML_PARSE_OPTIONS, options);
     }
 
-    /** @type {ParserTreeResult | undefined} */
+    /** @type {ParseTreeResult | undefined} */
     let secondParseResult;
     const getHtmlParseResult = () =>
       (secondParseResult ??= parseHtml(input, {
@@ -188,7 +207,7 @@ function ngHtmlParser(input, parseOptions, options) {
             attr.value = null;
           } else {
             attr.value = attr.valueSpan.toString();
-            if (/["']/.test(attr.value[0])) {
+            if (/["']/u.test(attr.value[0])) {
               attr.value = attr.value.slice(1, -1);
             }
           }
@@ -354,7 +373,7 @@ function parse(
 
   const parseSubHtml = (subContent, startSpan) => {
     const { offset } = startSpan;
-    const fakeContent = text.slice(0, offset).replaceAll(/[^\n\r]/g, " ");
+    const fakeContent = text.slice(0, offset).replaceAll(/[^\n\r]/gu, " ");
     const realContent = subContent;
     const subAst = parse(
       fakeContent + realContent,
@@ -395,6 +414,7 @@ function parse(
     }
 
     normalizeAngularControlFlowBlock(node);
+    normalizeAngularLetDeclaration(node);
     normalizeAngularIcuExpression(node);
   });
 
@@ -408,6 +428,7 @@ function createParser(parseOptions) {
   return {
     parse: (text, options) => parse(text, parseOptions, options),
     hasPragma,
+    hasIgnorePragma,
     astFormat: "html",
     locStart,
     locEnd,
@@ -424,6 +445,14 @@ const HTML_PARSE_OPTIONS = {
 
 // HTML
 export const html = createParser(HTML_PARSE_OPTIONS);
+
+const MJML_RAW_TAGS = new Set(["mj-style", "mj-raw"]);
+// MJML https://mjml.io/
+export const mjml = createParser({
+  ...HTML_PARSE_OPTIONS,
+  name: "mjml",
+  shouldParseAsRawText: (tagName) => MJML_RAW_TAGS.has(tagName),
+});
 // Angular
 export const angular = createParser({ name: "angular" });
 // Vue

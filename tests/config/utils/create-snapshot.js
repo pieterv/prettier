@@ -1,5 +1,4 @@
 import { wrap as raw } from "jest-snapshot-serializer-raw";
-
 import visualizeEndOfLine from "./visualize-end-of-line.js";
 import visualizeRange from "./visualize-range.js";
 
@@ -70,7 +69,7 @@ function createSnapshot(
     }
 
     input = visualizeRange(input, { rangeStart, rangeEnd });
-    codeOffset = input.match(/^>?\s+1 \|/)[0].length + 1;
+    codeOffset = input.match(/^>?\s+1 \|/u)[0].length + 1;
   }
 
   if ("endOfLine" in formatOptions) {

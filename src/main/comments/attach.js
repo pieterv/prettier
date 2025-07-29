@@ -1,5 +1,4 @@
 import assert from "node:assert";
-
 import { getChildren } from "../../utils/ast-utils.js";
 import hasNewline from "../../utils/has-newline.js";
 import isNonEmptyArray from "../../utils/is-non-empty-array.js";
@@ -11,7 +10,7 @@ import {
 } from "./utils.js";
 
 /**
- * @typedef {import("../../common/ast-path.js").default} AstPath
+ * @import AstPath from "../../common/ast-path.js"
  */
 
 const childNodesCache = new WeakMap();
@@ -143,8 +142,6 @@ function attachComments(ast, options) {
 
   const tiesToBreak = [];
   const {
-    locStart,
-    locEnd,
     printer: {
       experimentalFeatures: {
         // TODO: Make this as default behavior
@@ -180,25 +177,6 @@ function attachComments(ast, options) {
       ast,
       isLastComment,
     } = context;
-
-    if (
-      options.parser === "json" ||
-      options.parser === "json5" ||
-      options.parser === "jsonc" ||
-      options.parser === "__js_expression" ||
-      options.parser === "__ts_expression" ||
-      options.parser === "__vue_expression" ||
-      options.parser === "__vue_ts_expression"
-    ) {
-      if (locStart(comment) - locStart(ast) <= 0) {
-        addLeadingComment(ast, comment);
-        continue;
-      }
-      if (locEnd(comment) - locEnd(ast) >= 0) {
-        addTrailingComment(ast, comment);
-        continue;
-      }
-    }
 
     let args;
     if (avoidAstMutation) {
@@ -291,7 +269,7 @@ function attachComments(ast, options) {
   }
 }
 
-const isAllEmptyAndNoLineBreak = (text) => !/[\S\n\u2028\u2029]/.test(text);
+const isAllEmptyAndNoLineBreak = (text) => !/[\S\n\u2028\u2029]/u.test(text);
 function isOwnLineComment(text, options, decoratedComments, commentIndex) {
   const { comment, precedingNode } = decoratedComments[commentIndex];
   const { locStart, locEnd } = options;
@@ -372,7 +350,7 @@ function breakTies(tiesToBreak, options) {
 
     const gap = options.originalText.slice(options.locEnd(comment), gapEndPos);
 
-    if (options.printer.isGap?.(gap, options) ?? /^[\s(]*$/.test(gap)) {
+    if (options.printer.isGap?.(gap, options) ?? /^[\s(]*$/u.test(gap)) {
       gapEndPos = options.locStart(comment);
     } else {
       // The gap string contained something other than whitespace or open

@@ -7,15 +7,13 @@ import {
 } from "../utils/index.js";
 
 /**
- * @typedef {import("../types/estree.js").Node} Node
- * @typedef {import("../../common/ast-path.js").default} AstPath
+ * @import {Node} from "../types/estree.js"
+ * @import AstPath from "../../common/ast-path.js"
  */
 
 const nodeTypesCanNotAttachComment = new Set([
   "EmptyStatement",
   "TemplateElement",
-  // In ESTree `import` is a token, `import("foo")`
-  "Import",
   // There is no similar node in Babel AST
   // ```ts
   // class Foo {
@@ -46,7 +44,10 @@ function getCommentChildNodes(node, options) {
   if (
     (options.parser === "typescript" ||
       options.parser === "flow" ||
+      options.parser === "hermes" ||
       options.parser === "acorn" ||
+      options.parser === "oxc" ||
+      options.parser === "oxc-ts" ||
       options.parser === "espree" ||
       options.parser === "meriyah" ||
       options.parser === "__babel_estree") &&
@@ -82,10 +83,10 @@ function willPrintOwnComments(path) {
 }
 
 function isGap(text, { parser }) {
-  if (parser === "flow" || parser === "babel-flow") {
+  if (parser === "flow" || parser === "hermes" || parser === "babel-flow") {
     // Example: (a /* b */ /* : c */)
     //                gap ^^^^
-    text = text.replaceAll(/[\s(]/g, "");
+    text = text.replaceAll(/[\s(]/gu, "");
     return text === "" || text === "/*" || text === "/*::";
   }
 }

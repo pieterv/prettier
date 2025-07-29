@@ -1,11 +1,12 @@
 import { hardline, markAsRoot } from "../../document/builders.js";
 
 function print(node, textToDoc) {
-  if (node.lang === "yaml") {
+  if (node.language === "yaml") {
     const value = node.value.trim();
     const doc = value ? textToDoc(value, { parser: "yaml" }) : "";
     return markAsRoot([
       node.startDelimiter,
+      node.explicitLanguage,
       hardline,
       doc,
       doc ? hardline : "",

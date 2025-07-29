@@ -1,7 +1,9 @@
+import htmlWhitespaceUtils from "../utils/html-whitespace-utils.js";
 import { getOrderedListItemInfo, mapAst, splitText } from "./utils.js";
 
 // 0x0 ~ 0x10ffff
-const isSingleCharRegex = /^.$/su;
+const isSingleCharRegex = /^\\?.$/su;
+const isNewLineBlockquoteRegex = /^\n *>[ >]*$/u;
 
 function preprocess(ast, options) {
   ast = restoreUnescapedCharacter(ast, options);
@@ -13,21 +15,33 @@ function preprocess(ast, options) {
 }
 
 function restoreUnescapedCharacter(ast, options) {
-  return mapAst(ast, (node) =>
-    node.type !== "text" ||
-    node.value === "*" ||
-    node.value === "_" || // handle these cases in printer
-    !isSingleCharRegex.test(node.value) ||
-    node.position.end.offset - node.position.start.offset === node.value.length
-      ? node
-      : {
-          ...node,
-          value: options.originalText.slice(
-            node.position.start.offset,
-            node.position.end.offset,
-          ),
-        },
-  );
+  return mapAst(ast, (node) => {
+    if (node.type !== "text") {
+      return node;
+    }
+
+    const { value } = node;
+
+    if (
+      value === "*" ||
+      value === "_" || // handle these cases in printer
+      !isSingleCharRegex.test(value) ||
+      node.position.end.offset - node.position.start.offset === value.length
+    ) {
+      return node;
+    }
+
+    const text = options.originalText.slice(
+      node.position.start.offset,
+      node.position.end.offset,
+    );
+
+    if (isNewLineBlockquoteRegex.test(text)) {
+      return node;
+    }
+
+    return { ...node, value: text };
+  });
 }
 
 function mergeChildren(ast, shouldMerge, mergeNode) {
@@ -72,11 +86,13 @@ function splitTextIntoSentences(ast) {
     let { value } = node;
 
     if (parentNode.type === "paragraph") {
+      // CommonMark doesn't remove trailing/leading \f, but it should be
+      // removed in the HTML rendering process
       if (index === 0) {
-        value = value.trimStart();
+        value = htmlWhitespaceUtils.trimStart(value);
       }
       if (index === parentNode.children.length - 1) {
-        value = value.trimEnd();
+        value = htmlWhitespaceUtils.trimEnd(value);
       }
     }
 
@@ -92,7 +108,7 @@ function transformIndentedCodeblockAndMarkItsParentList(ast, options) {
   return mapAst(ast, (node, index, parentStack) => {
     if (node.type === "code") {
       // the first char may point to `\n`, e.g. `\n\t\tbar`, just ignore it
-      const isIndented = /^\n?(?: {4,}|\t)/.test(
+      const isIndented = /^\n?(?: {4,}|\t)/u.test(
         options.originalText.slice(
           node.position.start.offset,
           node.position.end.offset,
@@ -155,7 +171,7 @@ function markAlignedList(ast, options) {
 
     const [firstItem, secondItem] = list.children;
 
-    const firstInfo = getOrderedListItemInfo(firstItem, options.originalText);
+    const firstInfo = getOrderedListItemInfo(firstItem, options);
 
     if (firstInfo.leadingSpaces.length > 1) {
       /**
@@ -224,7 +240,7 @@ function markAlignedList(ast, options) {
      * 1. 123
      * 2. 123
      */
-    const secondInfo = getOrderedListItemInfo(secondItem, options.originalText);
+    const secondInfo = getOrderedListItemInfo(secondItem, options);
     return secondInfo.leadingSpaces.length > 1;
   }
 }

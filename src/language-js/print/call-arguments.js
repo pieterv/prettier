@@ -17,7 +17,7 @@ import {
   getCallArgumentSelector,
   getFunctionParameters,
   hasComment,
-  isArrayOrTupleExpression,
+  isArrayExpression,
   isBinaryCastExpression,
   isBinaryish,
   isCallExpression,
@@ -26,7 +26,7 @@ import {
   isJsxElement,
   isLongCurriedCallExpression,
   isNextLineEmpty,
-  isObjectOrRecordExpression,
+  isObjectExpression,
   isObjectProperty,
   isRegExpLiteral,
   isSimpleCallArgument,
@@ -78,11 +78,28 @@ function printCallArguments(path, options, print) {
     printedArguments.push(argDoc);
   });
 
-  // Dynamic imports cannot have trailing commas
-  const isDynamicImport =
-    node.type === "ImportExpression" || node.callee.type === "Import";
   const maybeTrailingComma =
-    !isDynamicImport && shouldPrintComma(options, "all") ? "," : "";
+    // Angular does not allow trailing comma
+    !options.parser.startsWith("__ng_") &&
+    // Dynamic imports cannot have trailing commas
+    node.type !== "ImportExpression" &&
+    node.type !== "TSImportType" &&
+    shouldPrintComma(options, "all")
+      ? ","
+      : "";
+
+  // TODO: Don't break long `ImportExpression` too
+  // Don't break simple import with long module name
+  if (
+    node.type === "TSImportType" &&
+    args.length === 1 &&
+    ((args[0].type === "TSLiteralType" && isStringLiteral(args[0].literal)) ||
+      // TODO: Remove this when update Babel to v8
+      isStringLiteral(args[0])) &&
+    !hasComment(args[0])
+  ) {
+    return group(["(", ...printedArguments, ifBreak(maybeTrailingComma), ")"]);
+  }
 
   function allArgsBrokenOut() {
     return group(
@@ -188,10 +205,9 @@ function printCallArguments(path, options, print) {
 
 function couldExpandArg(arg, arrowChainRecursion = false) {
   return (
-    (isObjectOrRecordExpression(arg) &&
+    (isObjectExpression(arg) &&
       (arg.properties.length > 0 || hasComment(arg))) ||
-    (isArrayOrTupleExpression(arg) &&
-      (arg.elements.length > 0 || hasComment(arg))) ||
+    (isArrayExpression(arg) && (arg.elements.length > 0 || hasComment(arg))) ||
     (arg.type === "TSTypeAssertion" && couldExpandArg(arg.expression)) ||
     (isBinaryCastExpression(arg) && couldExpandArg(arg.expression)) ||
     arg.type === "FunctionExpression" ||
@@ -215,8 +231,8 @@ function couldExpandArg(arg, arrowChainRecursion = false) {
       (arg.body.type === "BlockStatement" ||
         (arg.body.type === "ArrowFunctionExpression" &&
           couldExpandArg(arg.body, true)) ||
-        isObjectOrRecordExpression(arg.body) ||
-        isArrayOrTupleExpression(arg.body) ||
+        isObjectExpression(arg.body) ||
+        isArrayExpression(arg.body) ||
         (!arrowChainRecursion &&
           (isCallExpression(arg.body) ||
             arg.body.type === "ConditionalExpression")) ||
@@ -247,7 +263,7 @@ function shouldExpandLastArg(args, argDocs, options) {
     // useMemo(() => func(), [foo, bar, baz])
     (args.length !== 2 ||
       penultimateArg.type !== "ArrowFunctionExpression" ||
-      !isArrayOrTupleExpression(lastArg)) &&
+      !isArrayExpression(lastArg)) &&
     !(args.length > 1 && isConciselyPrintedArray(lastArg, options))
   );
 }
@@ -302,11 +318,14 @@ function isHopefullyShortCallArgument(node) {
       }
     }
     if (
-      (typeAnnotation.type === "GenericTypeAnnotation" ||
-        typeAnnotation.type === "TSTypeReference") &&
-      typeAnnotation.typeParameters?.params.length === 1
+      typeAnnotation.type === "GenericTypeAnnotation" ||
+      typeAnnotation.type === "TSTypeReference"
     ) {
-      typeAnnotation = typeAnnotation.typeParameters.params[0];
+      const typeArguments =
+        typeAnnotation.typeArguments ?? typeAnnotation.typeParameters;
+      if (typeArguments?.params.length === 1) {
+        typeAnnotation = typeArguments.params[0];
+      }
     }
     return (
       isSimpleType(typeAnnotation) && isSimpleCallArgument(node.expression, 1)
@@ -372,16 +391,24 @@ function isNonEmptyBlockStatement(node) {
   );
 }
 
-// { type: "module" }
+// `{ type: "module" }` and `{"type": "module"}`
 function isTypeModuleObjectExpression(node) {
+  if (!(node.type === "ObjectExpression" && node.properties.length === 1)) {
+    return false;
+  }
+
+  const [property] = node.properties;
+
+  if (!isObjectProperty(property)) {
+    return false;
+  }
+
   return (
-    node.type === "ObjectExpression" &&
-    node.properties.length === 1 &&
-    isObjectProperty(node.properties[0]) &&
-    node.properties[0].key.type === "Identifier" &&
-    node.properties[0].key.name === "type" &&
-    isStringLiteral(node.properties[0].value) &&
-    node.properties[0].value.value === "module"
+    !property.computed &&
+    ((property.key.type === "Identifier" && property.key.name === "type") ||
+      (isStringLiteral(property.key) && property.key.value === "type")) &&
+    isStringLiteral(property.value) &&
+    property.value.value === "module"
   );
 }
 

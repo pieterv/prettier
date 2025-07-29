@@ -16,10 +16,10 @@ import {
   getFunctionParameters,
   hasComment,
   hasRestParameter,
-  isArrayOrTupleExpression,
+  isArrayExpression,
   isFlowObjectTypePropertyAFunction,
   isNextLineEmpty,
-  isObjectOrRecordExpression,
+  isObjectExpression,
   isObjectType,
   isSimpleType,
   isTestCall,
@@ -29,12 +29,12 @@ import {
 } from "../utils/index.js";
 import { printFunctionTypeParameters } from "./misc.js";
 
-/** @typedef {import("../../common/ast-path.js").default} AstPath */
+/** @import AstPath from "../../common/ast-path.js" */
 
 function printFunctionParameters(
   path,
-  print,
   options,
+  print,
   expandArg,
   printTypeParams,
 ) {
@@ -185,9 +185,9 @@ function shouldHugTheOnlyFunctionParameter(node) {
         (parameter.left.type === "ObjectPattern" ||
           parameter.left.type === "ArrayPattern") &&
         (parameter.right.type === "Identifier" ||
-          (isObjectOrRecordExpression(parameter.right) &&
+          (isObjectExpression(parameter.right) &&
             parameter.right.properties.length === 0) ||
-          (isArrayOrTupleExpression(parameter.right) &&
+          (isArrayExpression(parameter.right) &&
             parameter.right.elements.length === 0))))
   );
 }

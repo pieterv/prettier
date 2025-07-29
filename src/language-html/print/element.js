@@ -81,7 +81,7 @@ function printElement(path, options, print) {
       return indentIfBreak(childrenDoc, { groupId: attrGroupId });
     }
     if (
-      (isScriptLikeTag(node) || isVueCustomBlock(node, options)) &&
+      (isScriptLikeTag(node, options) || isVueCustomBlock(node, options)) &&
       node.parent.type === "root" &&
       options.parser === "vue" &&
       !options.vueIndentScriptAndStyle
@@ -140,6 +140,7 @@ function printElement(path, options, print) {
           node.isIndentationSensitive)) &&
       new RegExp(
         `\\n[\\t ]{${options.tabWidth * (path.ancestors.length - 1)}}$`,
+        "u",
       ).test(node.lastChild.value)
     ) {
       return "";

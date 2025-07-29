@@ -34,7 +34,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 import { getTypeParametersGroupId } from "./type-parameters.js";
 
 /**
- * @typedef {import("../../document/builders.js").Doc} Doc
+ * @import {Doc} from "../../document/builders.js"
  */
 
 const isClassProperty = createTypeCheckFunction([
@@ -79,7 +79,10 @@ function printClass(path, options, print) {
   if (node.superClass) {
     const printed = [
       printSuperClass(path, options, print),
-      print("superTypeParameters"),
+      print(
+        // TODO: Use `superTypeArguments` only when babel align with TS.
+        node.superTypeArguments ? "superTypeArguments" : "superTypeParameters",
+      ),
     ];
     const printedWithComments = path.call(
       (superClass) => ["extends ", printComments(superClass, printed, options)],
@@ -99,6 +102,7 @@ function printClass(path, options, print) {
     printHeritageClauses(path, options, print, "implements"),
   );
 
+  let heritageGroupId;
   if (groupMode) {
     let printedPartsGroup;
     if (shouldIndentOnlyHeritageClauses(node)) {
@@ -106,12 +110,21 @@ function printClass(path, options, print) {
     } else {
       printedPartsGroup = indent([...partsGroup, extendsParts]);
     }
-    parts.push(group(printedPartsGroup, { id: getHeritageGroupId(node) }));
+
+    heritageGroupId = getHeritageGroupId(node);
+    parts.push(group(printedPartsGroup, { id: heritageGroupId }));
   } else {
     parts.push(...partsGroup, ...extendsParts);
   }
 
-  parts.push(" ", print("body"));
+  const classBody = node.body;
+  if (groupMode && isNonEmptyArray(classBody.body)) {
+    parts.push(ifBreak(hardline, " ", { groupId: heritageGroupId }));
+  } else {
+    parts.push(" ");
+  }
+
+  parts.push(print("body"));
 
   return parts;
 }
@@ -218,7 +231,7 @@ function printClassProperty(path, options, print) {
     parts.push(printClassMemberDecorators(path, options, print));
   }
 
-  parts.push(printTypeScriptAccessibilityToken(node), printDeclareToken(path));
+  parts.push(printDeclareToken(path), printTypeScriptAccessibilityToken(node));
 
   if (node.static) {
     parts.push("static ");
@@ -295,7 +308,6 @@ function printClassBody(path, options, print) {
   }
 
   return [
-    isNonEmptyArray(node.body) ? printHardlineAfterHeritage(path.parent) : "",
     "{",
     parts.length > 0 ? [indent([hardline, parts]), hardline] : "",
     "}",
@@ -323,7 +335,8 @@ function shouldPrintSemicolonAfterClassProperty(node, nextNode) {
 
   if (
     nextNode.static ||
-    nextNode.accessibility // TypeScript
+    nextNode.accessibility || // TypeScript
+    nextNode.readonly // TypeScript
   ) {
     return false;
   }

@@ -1,7 +1,5 @@
 import fs from "node:fs/promises";
-
 import outdent from "outdent";
-
 import jestPathSerializer from "../path-serializer.js";
 
 expect.addSnapshotSerializer(jestPathSerializer);
@@ -18,7 +16,7 @@ describe("throw error for unsupported extension", () => {
 describe("throw error with invalid config format", () => {
   runCli("cli/config/invalid", ["--config", "file/.prettierrc"]).test({
     status: "non-zero",
-    stderr: expect.stringMatching(/Cannot find package '--invalid--'/),
+    stderr: expect.stringMatching(/Cannot find package '--invalid--'/u),
   });
 });
 
@@ -65,6 +63,23 @@ describe("resolves external configuration from package.json", () => {
   runCli("cli/config-external-config-syntax-error", ["syntax-error.js"]).test({
     status: 2,
   });
+});
+
+describe("throw error if both --config and --no-config are submitted", () => {
+  runCli("cli/config/invalid", ["--config", ".prettierrc", "--no-config"]).test(
+    {
+      status: 1,
+      write: [],
+      stdout: "",
+    },
+  );
+  runCli("cli/config/invalid", ["--no-config", "--config", ".prettierrc"]).test(
+    {
+      status: 1,
+      write: [],
+      stdout: "",
+    },
+  );
 });
 
 // Tests below require --parser to prevent an error (no parser/filepath specified)
@@ -126,17 +141,16 @@ describe("Invalid toml file", () => {
     stdout: "",
     write: [],
     stderr: expect.stringContaining(
-      /* cSpell:disable */
       outdent`
-        Unexpected character, expecting string, number, datetime, boolean, inline array or inline table at row 1, col 4, pos 3:
-        1> a=
+        Invalid TOML document: incomplete key-value declaration: no value specified
+
+        1:  a=
               ^
-        2:   b!=
+        2:    b!=
       `
         .split("\n")
         .map((line) => `[error] ${line}`)
         .join("\n"),
-      /* cSpell:enable */
     ),
   });
 });
@@ -152,18 +166,13 @@ describe("Invalid yaml file", () => {
     stdout: "",
     write: [],
     stderr: expect.stringContaining(
-      /* cSpell:disable */
+      // Keep the outdent, since error message changes between versions
       outdent`
-        end of the stream or a document separator is expected (2:1)
-
-         1 |   a
-         2 | -b
-        -----^
+        Map keys must be unique; "a" is repeated
       `
         .split("\n")
         .map((line) => `[error] ${line}`)
         .join("\n"),
-      /* cSpell:enable */
     ),
   });
 });

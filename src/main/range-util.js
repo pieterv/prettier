@@ -1,5 +1,4 @@
 import assert from "node:assert";
-
 import { getSortedChildNodes } from "./comments/attach.js";
 
 const isJsonParser = ({ parser }) =>
@@ -24,16 +23,15 @@ function findCommonAncestor(startNodeAndParents, endNodeAndParents) {
 }
 
 function dropRootParents(parents) {
-  let lastParentIndex = parents.length - 1;
-  for (;;) {
-    const parent = parents[lastParentIndex];
-    if (parent?.type === "Program" || parent?.type === "File") {
-      lastParentIndex--;
-    } else {
-      break;
-    }
+  const index = parents.findLastIndex(
+    (node) => node.type !== "Program" && node.type !== "File",
+  );
+
+  if (index === -1) {
+    return parents;
   }
-  return parents.slice(0, lastParentIndex + 1);
+
+  return parents.slice(0, index + 1);
 }
 
 function findSiblingAncestors(
@@ -172,6 +170,7 @@ function isSourceElement(opts, node, parentNode) {
   }
   switch (opts.parser) {
     case "flow":
+    case "hermes":
     case "babel":
     case "babel-flow":
     case "babel-ts":
@@ -179,6 +178,8 @@ function isSourceElement(opts, node, parentNode) {
     case "acorn":
     case "espree":
     case "meriyah":
+    case "oxc":
+    case "oxc-ts":
     case "__babel_estree":
       return isJsSourceElement(node.type, parentNode?.type);
     case "json":
@@ -199,12 +200,12 @@ function calculateRange(text, opts, ast) {
   assert.ok(end > start);
   // Contract the range so that it has non-whitespace characters at its endpoints.
   // This ensures we can format a range that doesn't end on a node.
-  const firstNonWhitespaceCharacterIndex = text.slice(start, end).search(/\S/);
+  const firstNonWhitespaceCharacterIndex = text.slice(start, end).search(/\S/u);
   const isAllWhitespace = firstNonWhitespaceCharacterIndex === -1;
   if (!isAllWhitespace) {
     start += firstNonWhitespaceCharacterIndex;
     for (; end > start; --end) {
-      if (/\S/.test(text[end - 1])) {
+      if (/\S/u.test(text[end - 1])) {
         break;
       }
     }
@@ -260,4 +261,4 @@ function calculateRange(text, opts, ast) {
   };
 }
 
-export { calculateRange, findNodeAtOffset };
+export { calculateRange };

@@ -4,7 +4,7 @@ import isNonEmptyArray from "../../utils/is-non-empty-array.js";
 import { printTemplateExpressions } from "../print/template-literal.js";
 import { isAngularComponentStyles } from "./utils.js";
 
-function printEmbedCss(textToDoc, print, path /*, options*/) {
+async function printEmbedCss(textToDoc, print, path /*, options*/) {
   const { node } = path;
 
   // Get full template literal with expressions replaced by placeholders
@@ -21,7 +21,7 @@ function printEmbedCss(textToDoc, print, path /*, options*/) {
           currVal,
     "",
   );
-  const quasisDoc = textToDoc(text, { parser: "scss" });
+  const quasisDoc = await textToDoc(text, { parser: "scss" });
   const expressionDocs = printTemplateExpressions(path, print);
   const newDoc = replacePlaceholders(quasisDoc, expressionDocs);
   /* c8 ignore next 3 */

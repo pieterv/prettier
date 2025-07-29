@@ -71,7 +71,7 @@ function printVueAttribute(path, options) {
 }
 
 /**
- * @returns {Doc}
+ * @returns {Promise<Doc>}
  */
 async function printVueVOnDirective(text, textToDoc, { parseWithTs }) {
   try {
@@ -94,7 +94,7 @@ async function printVueVOnDirective(text, textToDoc, { parseWithTs }) {
 }
 
 /**
- * @returns {Doc}
+ * @returns {Promise<Doc>}
  */
 function printVueVBindDirective(text, textToDoc, { parseWithTs }) {
   return formatAttributeValue(
@@ -106,7 +106,7 @@ function printVueVBindDirective(text, textToDoc, { parseWithTs }) {
 }
 
 /**
- * @returns {Doc}
+ * @returns {Promise<Doc>}
  */
 function printExpression(text, textToDoc, { parseWithTs }) {
   return formatAttributeValue(

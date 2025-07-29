@@ -14,7 +14,7 @@ import { hasLanguageComment, isAngularComponentTemplate } from "./utils.js";
 
 // The counter is needed to distinguish nested embeds.
 let htmlTemplateLiteralCounter = 0;
-function printEmbedHtmlLike(parser, textToDoc, print, path, options) {
+async function printEmbedHtmlLike(parser, textToDoc, print, path, options) {
   const { node } = path;
   const counter = htmlTemplateLiteralCounter;
   htmlTemplateLiteralCounter = (htmlTemplateLiteralCounter + 1) >>> 0;
@@ -37,7 +37,7 @@ function printEmbedHtmlLike(parser, textToDoc, print, path, options) {
     "gu",
   );
   let topLevelCount = 0;
-  const doc = textToDoc(text, {
+  const doc = await textToDoc(text, {
     parser,
     __onHtmlRoot(root) {
       topLevelCount = root.children.length;

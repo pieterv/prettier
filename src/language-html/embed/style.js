@@ -9,9 +9,9 @@ function printStyleAttribute(path, options) {
     !options.parentParser &&
     !text.includes("{{")
   ) {
-    return (textToDoc) =>
+    return async (textToDoc) =>
       printExpand(
-        textToDoc(text, { parser: "css", __isHTMLStyleAttribute: true }),
+        await textToDoc(text, { parser: "css", __isHTMLStyleAttribute: true }),
       );
   }
 }

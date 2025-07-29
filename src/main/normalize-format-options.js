@@ -18,7 +18,7 @@ const formatOptionsHiddenDefaults = {
 };
 
 // Copy options and fill in default values.
-function normalizeFormatOptions(options, opts = {}) {
+async function normalizeFormatOptions(options, opts = {}) {
   const rawOptions = { ...options };
 
   if (!rawOptions.parser) {
@@ -57,7 +57,7 @@ function normalizeFormatOptions(options, opts = {}) {
     rawOptions.parser,
   );
 
-  const parser = initParser(parserPlugin, rawOptions.parser);
+  const parser = await initParser(parserPlugin, rawOptions.parser);
   rawOptions.astFormat = parser.astFormat;
   rawOptions.locEnd = parser.locEnd;
   rawOptions.locStart = parser.locStart;
@@ -65,7 +65,7 @@ function normalizeFormatOptions(options, opts = {}) {
   const printerPlugin = parserPlugin.printers?.[parser.astFormat]
     ? parserPlugin
     : getPrinterPluginByAstFormat(rawOptions.plugins, parser.astFormat);
-  const printer = initPrinter(printerPlugin, parser.astFormat);
+  const printer = await initPrinter(printerPlugin, parser.astFormat);
 
   rawOptions.printer = printer;
 

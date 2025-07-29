@@ -50,12 +50,12 @@ function embed(path, options) {
           return;
         }
 
-        return (textToDoc, print) => {
+        return async (textToDoc, print) => {
           const content = getNodeContent(node, options);
           let isEmpty = /^\s*$/u.test(content);
           let doc = "";
           if (!isEmpty) {
-            doc = textToDoc(htmlTrimPreserveIndentation(content), {
+            doc = await textToDoc(htmlTrimPreserveIndentation(content), {
               parser,
               __embeddedInHtml: true,
             });
@@ -79,7 +79,7 @@ function embed(path, options) {
       if (isScriptLikeTag(node.parent, options)) {
         const parser = inferElementParser(node.parent, options);
         if (parser) {
-          return (textToDoc) => {
+          return async (textToDoc) => {
             const value =
               parser === "markdown"
                 ? dedentString(node.value.replace(/^[^\S\n]*\n/u, ""))
@@ -103,13 +103,13 @@ function embed(path, options) {
             return [
               breakParent,
               printOpeningTagPrefix(node, options),
-              textToDoc(value, textToDocOptions),
+              await textToDoc(value, textToDocOptions),
               printClosingTagSuffix(node, options),
             ];
           };
         }
       } else if (node.parent.type === "interpolation") {
-        return (textToDoc) => {
+        return async (textToDoc) => {
           const textToDocOptions = {
             __isInHtmlInterpolation: true, // to avoid unexpected `}}`
             __embeddedInHtml: true,
@@ -128,7 +128,7 @@ function embed(path, options) {
           }
 
           return [
-            indent([line, textToDoc(node.value, textToDocOptions)]),
+            indent([line, await textToDoc(node.value, textToDocOptions)]),
             node.parent.next &&
             needsToBorrowPrevClosingTagEndMarker(node.parent.next)
               ? " "

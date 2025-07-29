@@ -1,17 +1,17 @@
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import { isUrlString } from "url-or-path";
 
 /**
  * @param {string | URL} file
- * @returns {undefined | string}
+ * @returns {Promise<undefined | string>}
  */
-function readFile(file) {
+async function readFile(file) {
   if (isUrlString(file)) {
     file = new URL(file);
   }
 
   try {
-    return fs.readFileSync(file, "utf8");
+    return await fs.readFile(file, "utf8");
   } catch (/** @type {any} */ error) {
     if (error.code === "ENOENT") {
       return;

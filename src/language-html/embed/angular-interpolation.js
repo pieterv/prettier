@@ -4,7 +4,7 @@ import { formatAttributeValue } from "./utils.js";
 
 const interpolationRegex = /\{\{(.+?)\}\}/su;
 
-function printAngularInterpolation(text, textToDoc) {
+async function printAngularInterpolation(text, textToDoc) {
   const parts = [];
   for (const [index, part] of text.split(interpolationRegex).entries()) {
     if (index % 2 === 0) {
@@ -16,7 +16,7 @@ function printAngularInterpolation(text, textToDoc) {
             "{{",
             indent([
               line,
-              formatAttributeValue(part, textToDoc, {
+              await formatAttributeValue(part, textToDoc, {
                 parser: "__ng_interpolation",
                 __isInHtmlInterpolation: true, // to avoid unexpected `}}`
               }),

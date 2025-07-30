@@ -14,15 +14,15 @@ import { formatAttributeValue } from "./utils.js";
  *     v-for="(..., ...) of ..."
  *
  * @param {*} options
- * @returns {Doc}
+ * @returns {Promise<Doc>}
  */
-function printVueVForDirective(textToDoc, print, path, options) {
+async function printVueVForDirective(textToDoc, print, path, options) {
   const value = getUnescapedAttributeValue(path.node);
   const { left, operator, right } = parseVueVForDirective(value);
   const parseWithTs = isVueSfcWithTypescriptScript(path, options);
   return [
     group(
-      formatAttributeValue(`function _(${left}) {}`, textToDoc, {
+      await formatAttributeValue(`function _(${left}) {}`, textToDoc, {
         parser: parseWithTs ? "babel-ts" : "babel",
         __isVueForBindingLeft: true,
       }),
@@ -30,7 +30,7 @@ function printVueVForDirective(textToDoc, print, path, options) {
     " ",
     operator,
     " ",
-    formatAttributeValue(right, textToDoc, {
+    await formatAttributeValue(right, textToDoc, {
       parser: parseWithTs ? "__ts_expression" : "__js_expression",
     }),
   ];

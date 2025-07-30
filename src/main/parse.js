@@ -1,8 +1,8 @@
 import { codeFrameColumns } from "@babel/code-frame";
 import { resolveParser } from "./parser-and-printer.js";
 
-function parse(originalText, options) {
-  const parser = resolveParser(options);
+async function parse(originalText, options) {
+  const parser = await resolveParser(options);
   const text = parser.preprocess
     ? parser.preprocess(originalText, options)
     : originalText;
@@ -10,7 +10,7 @@ function parse(originalText, options) {
 
   let ast;
   try {
-    ast = parser.parse(
+    ast = await parser.parse(
       text,
       options,
       // TODO: remove the third argument in v4

@@ -35,9 +35,14 @@ function shouldHugJsExpression(ast, options) {
  * @param {Function} textToDoc
  * @param {*} options
  * @param {(ast: any, options: any) => boolean} [shouldHugJsExpression]
- * @returns {Doc}
+ * @returns {Promise<Doc>}
  */
-function formatAttributeValue(code, textToDoc, options, shouldHugJsExpression) {
+async function formatAttributeValue(
+  code,
+  textToDoc,
+  options,
+  shouldHugJsExpression,
+) {
   options = {
     // strictly prefer single quote to avoid unnecessary html entity escape
     __isInHtmlAttribute: true,
@@ -52,7 +57,7 @@ function formatAttributeValue(code, textToDoc, options, shouldHugJsExpression) {
     };
   }
 
-  const doc = textToDoc(code, options, textToDoc);
+  const doc = await textToDoc(code, options, textToDoc);
 
   return shouldHug ? group(doc) : printExpand(doc);
 }

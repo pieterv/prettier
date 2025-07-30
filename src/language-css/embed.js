@@ -5,8 +5,8 @@ function embed(path) {
   const { node } = path;
 
   if (node.type === "front-matter") {
-    return (textToDoc) => {
-      const doc = printFrontMatter(node, textToDoc);
+    return async (textToDoc) => {
+      const doc = await printFrontMatter(node, textToDoc);
       return doc ? [doc, hardline] : undefined;
     };
   }

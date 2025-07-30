@@ -28,8 +28,8 @@ import printIgnored from "./print-ignored.js";
  * state of the recursion. It is called "path", because it represents
  * the path to the current node through the Abstract Syntax Tree.
  */
-function printAstToDoc(ast, options) {
-  ({ ast } = prepareToPrint(ast, options));
+async function printAstToDoc(ast, options) {
+  ({ ast } = await prepareToPrint(ast, options));
 
   const cache = new Map();
   const path = new AstPath(ast);
@@ -37,11 +37,11 @@ function printAstToDoc(ast, options) {
   const ensurePrintingNode = createPrintPreCheckFunction(options);
   const embeds = new Map();
 
-  printEmbeddedLanguages(path, mainPrint, options, printAstToDoc, embeds);
+  await printEmbeddedLanguages(path, mainPrint, options, printAstToDoc, embeds);
 
   // Only the root call of the print method is awaited.
   // This is done to make things simpler for plugins that don't use recursive printing.
-  const doc = callPluginPrintFunction(
+  const doc = await callPluginPrintFunction(
     path,
     options,
     mainPrint,
@@ -142,7 +142,7 @@ function callPluginPrintFunction(path, options, printPath, args, embeds) {
   return doc;
 }
 
-function prepareToPrint(ast, options) {
+async function prepareToPrint(ast, options) {
   const comments = ast.comments ?? [];
   options[Symbol.for("comments")] = comments;
   // For JS printer to ignore attached comments
@@ -154,7 +154,7 @@ function prepareToPrint(ast, options) {
     printer: { preprocess },
   } = options;
 
-  ast = preprocess ? preprocess(ast, options) : ast;
+  ast = preprocess ? await preprocess(ast, options) : ast;
 
   return { ast, comments };
 }

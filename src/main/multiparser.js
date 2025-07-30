@@ -5,7 +5,7 @@ import parse from "./parse.js";
 
 /** @import AstPath from "../common/ast-path.js" */
 
-function printEmbeddedLanguages(
+async function printEmbeddedLanguages(
   /** @type {AstPath} */ path,
   genericPrint,
   options,
@@ -43,7 +43,7 @@ function printEmbeddedLanguages(
   for (const { print, node, pathStack } of embedCallResults) {
     try {
       path.stack = pathStack;
-      const doc = print(textToDocForEmbed, genericPrint, path, options);
+      const doc = await print(textToDocForEmbed, genericPrint, path, options);
 
       if (doc) {
         embeds.set(node, doc);
@@ -104,8 +104,13 @@ function printEmbeddedLanguages(
   }
 }
 
-function textToDoc(text, partialNextOptions, parentOptions, printAstToDoc) {
-  const options = normalizeFormatOptions(
+async function textToDoc(
+  text,
+  partialNextOptions,
+  parentOptions,
+  printAstToDoc,
+) {
+  const options = await normalizeFormatOptions(
     {
       ...parentOptions,
       ...partialNextOptions,
@@ -119,8 +124,8 @@ function textToDoc(text, partialNextOptions, parentOptions, printAstToDoc) {
     { passThrough: true },
   );
 
-  const { ast } = parse(text, options);
-  const doc = printAstToDoc(ast, options);
+  const { ast } = await parse(text, options);
+  const doc = await printAstToDoc(ast, options);
 
   return stripTrailingHardline(doc);
 }

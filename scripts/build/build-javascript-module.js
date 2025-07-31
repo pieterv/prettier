@@ -131,7 +131,7 @@ function getEsbuildOptions({ packageConfig, file, cliOptions }) {
       replacement: "globalThis.PRETTIER_DEBUG",
     });
 
-    // define.process = undefined;
+    define.process = undefined;
     // @babel/code-frame/lib/index.js
     define["process.emitWarning"] = undefined;
     // postcss/lib/postcss.js

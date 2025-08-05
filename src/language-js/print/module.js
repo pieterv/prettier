@@ -103,12 +103,10 @@ function printExportDeclaration(path, options, print) {
 }
 
 const shouldOmitSemicolon = createTypeCheckFunction([
-  "ComponentDeclaration",
   "ClassDeclaration",
   "ComponentDeclaration",
   "FunctionDeclaration",
   "TSInterfaceDeclaration",
-  "DeclareComponent",
   "DeclareClass",
   "DeclareComponent",
   "DeclareFunction",

@@ -324,6 +324,7 @@ function printFlow(path, options, print) {
     case "AsConstExpression":
     case "SatisfiesExpression":
       return printBinaryCastExpression(path, options, print);
+
     case "MatchExpression":
     case "MatchStatement":
       return printMatch(path, options, print);

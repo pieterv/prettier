@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`comments.js format 1`] = `
 ====================================options=====================================
@@ -309,33 +309,33 @@ async function bar2() {
 );
 
 !(x + y);
-!((x + y) /* foo */);
-!(/* foo */ (x + y));
+!(x + y /* foo */);
+!(/* foo */ x + y);
 !(
   /* foo */
-  (x + y)
+  x + y
 );
 !(
-  (x + y)
+  x + y
   /* foo */
 );
 !(
-  (x + y) // foo
+  x + y // foo
 );
 
 !(x || y);
-!(/* foo */ (x || y));
-!((x || y) /* foo */);
+!(/* foo */ x || y);
+!(x || y /* foo */);
 !(
   /* foo */
-  (x || y)
+  x || y
 );
 !(
-  (x || y)
+  x || y
   /* foo */
 );
 !(
-  (x || y) // foo
+  x || y // foo
 );
 
 ![1, 2, 3];

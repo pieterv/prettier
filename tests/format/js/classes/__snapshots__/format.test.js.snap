@@ -177,6 +177,32 @@ class Foo {
 ================================================================================
 `;
 
+exports[`computed-constructor-property.js format 1`] = `
+====================================options=====================================
+parsers: ["babel", "flow", "typescript"]
+printWidth: 80
+                                                                                | printWidth
+=====================================input======================================
+class A {
+  [constructor]
+}
+
+class B {
+  ["constructor"]
+}
+
+=====================================output=====================================
+class A {
+  [constructor];
+}
+
+class B {
+  ["constructor"];
+}
+
+================================================================================
+`;
+
 exports[`constructor.js format 1`] = `
 ====================================options=====================================
 parsers: ["babel", "flow", "typescript"]
@@ -213,31 +239,11 @@ parsers: ["babel", "flow", "typescript"]
 printWidth: 80
                                                                                 | printWidth
 =====================================input======================================
-class A1 {
-  // comment
-}
-
-class A2 { // comment
-}
-
-class A3 {
-}
-
 class A4 {
   m() {}
 }
 
 =====================================output=====================================
-class A1 {
-  // comment
-}
-
-class A2 {
-  // comment
-}
-
-class A3 {}
-
 class A4 {
   m() {}
 }

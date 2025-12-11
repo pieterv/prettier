@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`invalid.html format 1`] = `
 ====================================options=====================================
@@ -7,18 +7,20 @@ printWidth: 80
                                                                                 | printWidth
 =====================================input======================================
 ---
-    invalid:
-invalid:
+[
+    ! should NOT format !
+because: 
+this is INVALID yaml
 ---
-
-
 
 <html><head></head><body></body></html>
 
 =====================================output=====================================
 ---
-    invalid:
-invalid:
+[
+    ! should NOT format !
+because: 
+this is INVALID yaml
 ---
 
 <html>

@@ -1,6 +1,6 @@
-import isNonEmptyArray from "../utils/is-non-empty-array.js";
-import lineColumnToIndex from "../utils/line-column-to-index.js";
-import { skipEverythingButNewLine } from "../utils/skip.js";
+import isNonEmptyArray from "../utilities/is-non-empty-array.js";
+import lineColumnToIndex from "../utilities/line-column-to-index.js";
+import { skipEverythingButNewLine } from "../utilities/skip.js";
 
 function fixValueWordLoc(node, originalIndex) {
   const { value } = node;
@@ -245,12 +245,7 @@ function replaceQuotesInInlineComments(text) {
   return text;
 }
 
-function locStart(node) {
-  return node.source?.startOffset;
-}
-
-function locEnd(node) {
-  return node.source?.endOffset;
-}
+const locStart = (node) => node.source?.startOffset;
+const locEnd = (node) => node.source?.endOffset;
 
 export { calculateLoc, locEnd, locStart, replaceQuotesInInlineComments };

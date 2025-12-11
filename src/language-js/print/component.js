@@ -5,16 +5,16 @@ import {
   indent,
   line,
   softline,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
-import getNextNonSpaceNonCommentCharacter from "../../utils/get-next-non-space-non-comment-character.js";
+import getNextNonSpaceNonCommentCharacter from "../../utilities/get-next-non-space-non-comment-character.js";
 import { locEnd } from "../loc.js";
-import { isNextLineEmpty, shouldPrintComma } from "../utils/index.js";
-import { printDeclareToken } from "./misc.js";
+import { isNextLineEmpty, shouldPrintComma } from "../utilities/index.js";
+import { printDeclareToken } from "./miscellaneous.js";
 
 /**
  * @import AstPath from "../../common/ast-path.js"
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  */
 
 /*
@@ -117,6 +117,9 @@ function iterateComponentParametersPath(path, iteratee) {
   }
 }
 
+/*
+- `ComponentParameter` (Flow)
+*/
 function printComponentParameter(path, options, print) {
   const { node } = path;
   if (node.shorthand) {

@@ -7,11 +7,11 @@ import {
   indent,
   line,
   softline,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
-import hasNewlineInRange from "../../utils/has-newline-in-range.js";
+import hasNewlineInRange from "../../utilities/has-newline-in-range.js";
 import { locEnd, locStart } from "../loc.js";
-import pathNeedsParens from "../needs-parens.js";
+import needsParentheses from "../parentheses/needs-parentheses.js";
 import {
   CommentCheckFlags,
   getComments,
@@ -22,13 +22,14 @@ import {
   isJsxElement,
   isLoneShortArgument,
   isMemberExpression,
+  isReturnOrThrowStatement,
   isSimpleExpressionByNodeCount,
-} from "../utils/index.js";
-import isBlockComment from "../utils/is-block-comment.js";
+} from "../utilities/index.js";
+import isBlockComment from "../utilities/is-block-comment.js";
 import { printTernaryOld } from "./ternary-old.js";
 
 /**
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  * @import AstPath from "../../common/ast-path.js"
  *
  * @typedef {any} Options - Prettier options (TBD ...)
@@ -211,7 +212,7 @@ function printTernary(path, options, print, args) {
       parent.type === "Property");
 
   const isOnSameLineAsReturn =
-    (parent.type === "ReturnStatement" || parent.type === "ThrowStatement") &&
+    isReturnOrThrowStatement(parent) &&
     !(isConsequentTernary || isAlternateTernary);
 
   const isInJsx =
@@ -221,7 +222,8 @@ function printTernary(path, options, print, args) {
 
   const shouldExtraIndent = shouldExtraIndentForConditionalExpression(path);
   const breakClosingParen = shouldBreakClosingParen(node, parent);
-  const breakTSClosingParen = isTSConditional && pathNeedsParens(path, options);
+  const breakTSClosingParen =
+    isTSConditional && needsParentheses(path, options);
 
   const fillTab = !isBigTabs
     ? ""
@@ -282,25 +284,22 @@ function printTernary(path, options, print, args) {
     !isConsequentTernary &&
     hasComment(consequentNode, CommentCheckFlags.Dangling)
   ) {
-    path.call((childPath) => {
-      consequentComments.push(
-        printDanglingComments(childPath, options),
-        hardline,
-      );
+    path.call(() => {
+      consequentComments.push(printDanglingComments(path, options), hardline);
     }, "consequent");
   }
   const alternateComments = [];
   if (hasComment(node.test, CommentCheckFlags.Dangling)) {
-    path.call((childPath) => {
-      alternateComments.push(printDanglingComments(childPath, options));
+    path.call(() => {
+      alternateComments.push(printDanglingComments(path, options));
     }, "test");
   }
   if (
     !isAlternateTernary &&
     hasComment(alternateNode, CommentCheckFlags.Dangling)
   ) {
-    path.call((childPath) => {
-      alternateComments.push(printDanglingComments(childPath, options));
+    path.call(() => {
+      alternateComments.push(printDanglingComments(path, options));
     }, "alternate");
   }
   if (hasComment(node, CommentCheckFlags.Dangling)) {

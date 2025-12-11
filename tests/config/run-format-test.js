@@ -3,11 +3,11 @@ import path from "node:path";
 import url from "node:url";
 import createEsmUtils from "esm-utils";
 import getPrettier from "./get-prettier.js";
-import checkParsers from "./utils/check-parsers.js";
-import consistentEndOfLine from "./utils/consistent-end-of-line.js";
-import createSnapshot from "./utils/create-snapshot.js";
-import stringifyOptionsForTitle from "./utils/stringify-options-for-title.js";
-import visualizeEndOfLine from "./utils/visualize-end-of-line.js";
+import checkParsers from "./utilities/check-parsers.js";
+import consistentEndOfLine from "./utilities/consistent-end-of-line.js";
+import createSnapshot from "./utilities/create-snapshot.js";
+import stringifyOptionsForTitle from "./utilities/stringify-options-for-title.js";
+import visualizeEndOfLine from "./utilities/visualize-end-of-line.js";
 
 const { __dirname } = createEsmUtils(import.meta);
 
@@ -22,11 +22,11 @@ const RANGE_END_PLACEHOLDER = "<<<PRETTIER_RANGE_END>>>";
 // TODO: these test files need fix
 const unstableTests = new Map(
   [
-    "js/class-comment/misc.js",
     ["js/comments/dangling_array.js", (options) => options.semi === false],
     ["js/comments/jsx.js", (options) => options.semi === false],
     "js/comments/return-statement.js",
     "js/comments/tagged-template-literal.js",
+    "js/for/9812-unstable.js",
     "markdown/spec/example-234.md",
     "markdown/spec/example-235.md",
     [
@@ -39,7 +39,6 @@ const unstableTests = new Map(
     "flow/hook/hook-type-annotation.js",
     "typescript/prettier-ignore/mapped-types.ts",
     "typescript/prettier-ignore/issue-14238.ts",
-    "js/comments/html-like/comment.js",
     "js/for/continue-and-break-comment-without-blocks.js",
     "js/sequence-expression/parenthesized.js",
     "typescript/satisfies-operators/comments-unstable.ts",
@@ -48,6 +47,9 @@ const unstableTests = new Map(
     ["js/ignore/semi/asi.js", (options) => options.semi === false],
     "typescript/union/consistent-with-flow/single-type.ts",
     "js/if/non-block.js",
+    "typescript/import-type/long-module-name/long-module-name4.ts",
+    // Unstable due to lack of indent information
+    "js/multiparser-comments/comment-inside.js",
   ].map((fixture) => {
     const [file, isUnstable = () => true] = Array.isArray(fixture)
       ? fixture
@@ -70,13 +72,6 @@ const meriyahDisabledTests = new Set(
   [
     // Parsing to different ASTs
     "js/decorators/member-expression.js",
-    // Meriyah parse RegExp relay on runtime behavior
-    // The following fails on Node.js < 20
-    "js/babel-plugins/regex-v-flag.js",
-    "js/regex/v-flag.js",
-    "js/regex/d-flag.js",
-    "js/babel-plugins/regexp-modifiers.js",
-    "js/regex/regexp-modifiers.js",
   ].map((file) => path.join(__dirname, "../format", file)),
 );
 const babelTsDisabledTests = new Set(
@@ -98,6 +93,13 @@ const flowDisabledTests = new Set(
   [
     // Parsing to different ASTs
     "js/decorators/member-expression.js",
+  ].map((file) => path.join(__dirname, "../format", file)),
+);
+const typescriptDisabledTests = new Set(
+  [
+    // https://github.com/typescript-eslint/typescript-eslint/issues/11389
+    "js/import/long-module-name/import-defer.js",
+    "js/import/long-module-name/import-source.js",
   ].map((file) => path.join(__dirname, "../format", file)),
 );
 
@@ -317,7 +319,10 @@ function runFormatTest(fixtures, parsers, options) {
           (currentParser === "oxc-ts" && oxcTsDisabledTests.has(filename)) ||
           (currentParser === "hermes" && hermesDisabledTests.has(filename)) ||
           (currentParser === "flow" && flowDisabledTests.has(filename)) ||
-          (currentParser === "babel-ts" && babelTsDisabledTests.has(filename))
+          (currentParser === "babel-ts" &&
+            babelTsDisabledTests.has(filename)) ||
+          (currentParser === "typescript" &&
+            typescriptDisabledTests.has(filename))
         ) {
           continue;
         }

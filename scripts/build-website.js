@@ -14,7 +14,7 @@ import {
   WEBSITE_DIR,
   writeFile,
   writeJson,
-} from "./utils/index.js";
+} from "./utilities/index.js";
 
 const runYarn = (command, args, options) =>
   spawn("yarn", [command, ...args], { stdio: "inherit", ...options });
@@ -68,39 +68,41 @@ async function buildPlaygroundFiles() {
     for (const pluginName of ["plugin-hermes"]) {
       pluginFiles.push(`${pluginName}/index.mjs`);
     }
+    for (const pluginName of ["plugin-oxc"]) {
+      pluginFiles.push(`${pluginName}/index.browser.mjs`);
+    }
   }
 
   const packageManifest = {
     prettier: {
       file: "prettier/standalone.mjs",
     },
+    plugins: await Promise.all(
+      pluginFiles.map(async (file) => {
+        const plugin = { file };
+
+        const pluginModule = await import(
+          url.pathToFileURL(path.join(PACKAGES_DIRECTORY, file))
+        );
+
+        for (const property of ["languages", "options", "defaultOptions"]) {
+          const value = pluginModule[property];
+          if (value !== undefined) {
+            plugin[property] = value;
+          }
+        }
+
+        for (const property of ["parsers", "printers"]) {
+          const value = pluginModule[property];
+          if (value !== undefined) {
+            plugin[property] = Object.keys(value);
+          }
+        }
+
+        return plugin;
+      }),
+    ),
   };
-
-  packageManifest.plugins = await Promise.all(
-    pluginFiles.map(async (file) => {
-      const plugin = { file };
-
-      const pluginModule = await import(
-        url.pathToFileURL(path.join(PACKAGES_DIRECTORY, file))
-      );
-
-      for (const property of ["languages", "options", "defaultOptions"]) {
-        const value = pluginModule[property];
-        if (value !== undefined) {
-          plugin[property] = value;
-        }
-      }
-
-      for (const property of ["parsers", "printers"]) {
-        const value = pluginModule[property];
-        if (value !== undefined) {
-          plugin[property] = Object.keys(value);
-        }
-      }
-
-      return plugin;
-    }),
-  );
 
   await Promise.all([
     ...[packageManifest.prettier, ...packageManifest.plugins].map(({ file }) =>
@@ -127,12 +129,6 @@ await buildPlaygroundFiles();
 // --- Site ---
 console.log("Installing website dependencies...");
 await runYarn("install", [], { cwd: WEBSITE_DIR });
-
-if (IS_PULL_REQUEST) {
-  console.log("Synchronizing docs...");
-  process.env.PRETTIER_VERSION = `999.999.999-pr.${process.env.REVIEW_ID}`;
-  await runYarn("update-stable-docs", [], { cwd: WEBSITE_DIR });
-}
 
 console.log("Building website...");
 await runYarn("build", [], { cwd: WEBSITE_DIR });

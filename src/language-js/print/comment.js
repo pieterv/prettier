@@ -1,12 +1,11 @@
-import { hardline, join } from "../../document/builders.js";
-import { replaceEndOfLine } from "../../document/utils.js";
+import { hardline, join, replaceEndOfLine } from "../../document/index.js";
 import { locEnd, locStart } from "../loc.js";
-import isBlockComment from "../utils/is-block-comment.js";
-import isIndentableBlockComment from "../utils/is-indentable-block-comment.js";
-import isLineComment from "../utils/is-line-comment.js";
+import isBlockComment from "../utilities/is-block-comment.js";
+import isIndentableBlockComment from "../utilities/is-indentable-block-comment.js";
+import isLineComment from "../utilities/is-line-comment.js";
 
-function printComment(commentPath, options) {
-  const comment = commentPath.node;
+function printComment(path, options) {
+  const comment = path.node;
 
   if (isLineComment(comment)) {
     // Supports `//`, `#!`, `<!--`, and `-->`

@@ -1,7 +1,7 @@
 import { parse as hermesParse } from "hermes-parser";
 import createError from "../../common/parser-create-error.js";
 import postprocess from "./postprocess/index.js";
-import createParser from "./utils/create-parser.js";
+import createParser from "./utilities/create-parser.js";
 
 function createParseError(error) {
   let { message, loc } = error;
@@ -37,7 +37,7 @@ const parseOptions = {
   allowReturnOutsideFunction: true,
 };
 
-async function parse(text /*, options*/) {
+async function parse(text /* , options*/) {
   let ast;
   try {
     ast = await hermesParse(text, parseOptions);

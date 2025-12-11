@@ -1,13 +1,13 @@
-import { hardline, line, softline } from "../document/builders.js";
+import { hardline, line, softline } from "../document/index.js";
 import {
   KIND_CJ_LETTER,
   KIND_CJK_PUNCTUATION,
   KIND_K_LETTER,
   KIND_NON_CJK,
-} from "./utils.js";
+} from "./utilities.js";
 
 /**
- * @import {WordNode, WhitespaceValue, WordKind} from "./utils.js"
+ * @import {WordNode, WhitespaceValue, WordKind} from "./utilities.js"
  * @import AstPath from "../common/ast-path.js"
  * @typedef {"always" | "never" | "preserve"} ProseWrap
  * @typedef {{ next?: WordNode | null, previous?: WordNode | null }}

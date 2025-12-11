@@ -1,5 +1,5 @@
-import htmlWhitespaceUtils from "../utils/html-whitespace-utils.js";
-import { getOrderedListItemInfo, mapAst, splitText } from "./utils.js";
+import htmlWhitespace from "../utilities/html-whitespace.js";
+import { getOrderedListItemInfo, mapAst, splitText } from "./utilities.js";
 
 // 0x0 ~ 0x10ffff
 const isSingleCharRegex = /^\\?.$/su;
@@ -49,16 +49,24 @@ function mergeChildren(ast, shouldMerge, mergeNode) {
     if (!node.children) {
       return node;
     }
-    const children = node.children.reduce((current, child) => {
-      const lastChild = current.at(-1);
+
+    const children = [];
+    let lastChild;
+    let changed;
+    for (let child of node.children) {
       if (lastChild && shouldMerge(lastChild, child)) {
-        current.splice(-1, 1, mergeNode(lastChild, child));
+        child = mergeNode(lastChild, child);
+        // Replace the previous node
+        children.splice(-1, 1, child);
+        changed ||= true;
       } else {
-        current.push(child);
+        children.push(child);
       }
-      return current;
-    }, []);
-    return { ...node, children };
+
+      lastChild = child;
+    }
+
+    return changed ? { ...node, children } : node;
   });
 }
 
@@ -89,10 +97,10 @@ function splitTextIntoSentences(ast) {
       // CommonMark doesn't remove trailing/leading \f, but it should be
       // removed in the HTML rendering process
       if (index === 0) {
-        value = htmlWhitespaceUtils.trimStart(value);
+        value = htmlWhitespace.trimStart(value);
       }
       if (index === parentNode.children.length - 1) {
-        value = htmlWhitespaceUtils.trimEnd(value);
+        value = htmlWhitespace.trimEnd(value);
       }
     }
 

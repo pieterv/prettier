@@ -73,7 +73,6 @@ exports[`visitor keys estree 1`] = `
     "arguments",
     "callee",
     "typeArguments",
-    "typeParameters",
   ],
   "CatchClause": [
     "body",
@@ -309,12 +308,6 @@ exports[`visitor keys estree 1`] = `
     "members",
   ],
   "ExistsTypeAnnotation": [],
-  "ExperimentalRestProperty": [
-    "argument",
-  ],
-  "ExperimentalSpreadProperty": [
-    "argument",
-  ],
   "ExportAllDeclaration": [
     "attributes",
     "exported",
@@ -373,6 +366,7 @@ exports[`visitor keys estree 1`] = `
     "body",
     "id",
     "params",
+    "predicate",
     "returnType",
     "typeParameters",
   ],
@@ -497,7 +491,6 @@ exports[`visitor keys estree 1`] = `
     "attributes",
     "name",
     "typeArguments",
-    "typeParameters",
   ],
   "JSXOpeningFragment": [],
   "JSXSpreadAttribute": [
@@ -636,9 +629,7 @@ exports[`visitor keys estree 1`] = `
     "arguments",
     "callee",
     "typeArguments",
-    "typeParameters",
   ],
-  "Noop": [],
   "NullLiteral": [],
   "NullLiteralTypeAnnotation": [],
   "NullableTypeAnnotation": [
@@ -713,7 +704,6 @@ exports[`visitor keys estree 1`] = `
     "arguments",
     "callee",
     "typeArguments",
-    "typeParameters",
   ],
   "OptionalIndexedAccessType": [
     "indexType",
@@ -823,16 +813,13 @@ exports[`visitor keys estree 1`] = `
   "TSBigIntKeyword": [],
   "TSBooleanKeyword": [],
   "TSCallSignatureDeclaration": [
-    "parameters",
     "params",
     "returnType",
-    "typeAnnotation",
     "typeParameters",
   ],
   "TSClassImplements": [
     "expression",
     "typeArguments",
-    "typeParameters",
   ],
   "TSConditionalType": [
     "checkType",
@@ -841,17 +828,13 @@ exports[`visitor keys estree 1`] = `
     "trueType",
   ],
   "TSConstructSignatureDeclaration": [
-    "parameters",
     "params",
     "returnType",
-    "typeAnnotation",
     "typeParameters",
   ],
   "TSConstructorType": [
-    "parameters",
     "params",
     "returnType",
-    "typeAnnotation",
     "typeParameters",
   ],
   "TSDeclareFunction": [
@@ -890,18 +873,12 @@ exports[`visitor keys estree 1`] = `
     "expression",
   ],
   "TSExportKeyword": [],
-  "TSExpressionWithTypeArguments": [
-    "expression",
-    "typeParameters",
-  ],
   "TSExternalModuleReference": [
     "expression",
   ],
   "TSFunctionType": [
-    "parameters",
     "params",
     "returnType",
-    "typeAnnotation",
     "typeParameters",
   ],
   "TSImportEqualsDeclaration": [
@@ -909,11 +886,10 @@ exports[`visitor keys estree 1`] = `
     "moduleReference",
   ],
   "TSImportType": [
-    "argument",
     "options",
     "qualifier",
+    "source",
     "typeArguments",
-    "typeParameters",
   ],
   "TSIndexSignature": [
     "parameters",
@@ -929,7 +905,6 @@ exports[`visitor keys estree 1`] = `
   "TSInstantiationExpression": [
     "expression",
     "typeArguments",
-    "typeParameters",
   ],
   "TSInterfaceBody": [
     "body",
@@ -943,7 +918,6 @@ exports[`visitor keys estree 1`] = `
   "TSInterfaceHeritage": [
     "expression",
     "typeArguments",
-    "typeParameters",
   ],
   "TSIntersectionType": [
     "types",
@@ -968,10 +942,8 @@ exports[`visitor keys estree 1`] = `
   ],
   "TSMethodSignature": [
     "key",
-    "parameters",
     "params",
     "returnType",
-    "typeAnnotation",
     "typeParameters",
   ],
   "TSModuleBlock": [
@@ -1071,12 +1043,10 @@ exports[`visitor keys estree 1`] = `
   "TSTypeQuery": [
     "exprName",
     "typeArguments",
-    "typeParameters",
   ],
   "TSTypeReference": [
     "typeArguments",
     "typeName",
-    "typeParameters",
   ],
   "TSUndefinedKeyword": [],
   "TSUnionType": [
@@ -1088,7 +1058,6 @@ exports[`visitor keys estree 1`] = `
     "quasi",
     "tag",
     "typeArguments",
-    "typeParameters",
   ],
   "TemplateElement": [],
   "TemplateLiteral": [
@@ -1146,7 +1115,6 @@ exports[`visitor keys estree 1`] = `
     "params",
   ],
   "TypePredicate": [
-    "asserts",
     "parameterName",
     "typeAnnotation",
   ],
@@ -1333,6 +1301,7 @@ exports[`visitor keys graphql 1`] = `
   ],
   "FloatValue": [],
   "FragmentDefinition": [
+    "description",
     "directives",
     "name",
     "selectionSet",
@@ -1415,6 +1384,7 @@ exports[`visitor keys graphql 1`] = `
     "fields",
   ],
   "OperationDefinition": [
+    "description",
     "directives",
     "name",
     "selectionSet",
@@ -1461,6 +1431,7 @@ exports[`visitor keys graphql 1`] = `
   ],
   "VariableDefinition": [
     "defaultValue",
+    "description",
     "directives",
     "type",
     "variable",
@@ -1496,7 +1467,6 @@ exports[`visitor keys html 1`] = `
     "attrs",
     "children",
   ],
-  "front-matter": [],
   "ieConditionalComment": [
     "children",
   ],
@@ -1536,7 +1506,6 @@ exports[`visitor keys postcss 1`] = `
     "nodes",
     "selector",
   ],
-  "front-matter": [],
   "media-colon": [],
   "media-feature": [],
   "media-feature-expression": [
@@ -1628,7 +1597,6 @@ exports[`visitor keys remark 1`] = `
     "children",
   ],
   "footnoteReference": [],
-  "front-matter": [],
   "heading": [
     "children",
   ],
@@ -1694,12 +1662,10 @@ exports[`visitor keys yaml 1`] = `
     "trailingComment",
   ],
   "anchor": [
-    "anchor",
     "endComments",
     "indicatorComment",
     "leadingComments",
     "middleComments",
-    "tag",
     "trailingComment",
   ],
   "blockFolded": [
@@ -1918,12 +1884,10 @@ exports[`visitor keys yaml 1`] = `
     "trailingComment",
   ],
   "tag": [
-    "anchor",
     "endComments",
     "indicatorComment",
     "leadingComments",
     "middleComments",
-    "tag",
     "trailingComment",
   ],
 }

@@ -1,16 +1,16 @@
 import { parse as babelParse, parseExpression } from "@babel/parser";
-import getNextNonSpaceNonCommentCharacterIndex from "../../utils/get-next-non-space-non-comment-character-index.js";
-import tryCombinations from "../../utils/try-combinations.js";
-import getShebang from "../utils/get-shebang.js";
+import getNextNonSpaceNonCommentCharacterIndex from "../../utilities/get-next-non-space-non-comment-character-index.js";
+import { tryCombinationsSync } from "../../utilities/try-combinations.js";
+import getShebang from "../utilities/get-shebang.js";
 import postprocess from "./postprocess/index.js";
-import createBabelParseError from "./utils/create-babel-parse-error.js";
-import createParser from "./utils/create-parser.js";
+import createBabelParseError from "./utilities/create-babel-parse-error.js";
+import createParser from "./utilities/create-parser.js";
 import {
   getSourceType,
+  SOURCE_TYPE_COMMONJS,
   SOURCE_TYPE_MODULE,
-  SOURCE_TYPE_SCRIPT,
-} from "./utils/source-types.js";
-import wrapBabelExpression from "./utils/wrap-babel-expression.js";
+} from "./utilities/source-types.js";
+import wrapBabelExpression from "./utilities/wrap-babel-expression.js";
 
 const createBabelParser = (options) => createParser(createParse(options));
 
@@ -30,7 +30,6 @@ const parseOptions = {
   allowUndeclaredExports: true,
   errorRecovery: true,
   createParenthesizedExpressions: true,
-  createImportExpressions: true,
   attachComment: false,
   plugins: [
     // When adding a plugin, please add a test in `tests/format/js/babel-plugins`,
@@ -122,10 +121,17 @@ function createParse({ isExpression = false, optionsCombinations }) {
 
     let combinations = optionsCombinations;
     const sourceType = options.__babelSourceType ?? getSourceType(filepath);
-    if (sourceType === SOURCE_TYPE_SCRIPT) {
+    if (sourceType && sourceType !== SOURCE_TYPE_MODULE) {
       combinations = combinations.map((options) => ({
         ...options,
         sourceType,
+        // `sourceType: "commonjs"` does not allow these two properties
+        ...(sourceType === SOURCE_TYPE_COMMONJS
+          ? {
+              allowReturnOutsideFunction: undefined,
+              allowNewTargetOutsideFunction: undefined,
+            }
+          : undefined),
       }));
     }
 
@@ -150,7 +156,7 @@ function createParse({ isExpression = false, optionsCombinations }) {
 
     let ast;
     try {
-      ast = tryCombinations(
+      ast = tryCombinationsSync(
         combinations.map(
           (options) => () => parseWithOptions(parseFunction, text, options),
         ),
@@ -182,11 +188,7 @@ const allowedReasonCodes = new Set([
   "StrictFunction",
   "ForInOfLoopInitializer",
 
-  "EmptyTypeArguments",
-  "EmptyTypeParameters",
   "ConstructorHasTypeParameters",
-
-  "UnsupportedParameterPropertyKind",
 
   "DecoratorExportClass",
   "ParamDupe",
@@ -200,10 +202,8 @@ const allowedReasonCodes = new Set([
   "NonAbstractClassHasAbstractMethod",
   "OptionalTypeBeforeRequired",
   "PatternIsOptional",
-  "OptionalBindingPattern",
   "DeclareClassFieldHasInitializer",
   "TypeImportCannotSpecifyDefaultAndNamed",
-  "ConstructorClassField",
 
   "VarRedeclaration",
   "InvalidPrivateFieldResolution",

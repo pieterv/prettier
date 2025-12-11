@@ -2,7 +2,7 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   dependencyDashboardApproval: true,
   labels: ["dependency"],
-  baseBranches: ["main"],
+  baseBranchPatterns: ["main"],
   schedule: ["after 01:00 on sunday"],
   postUpdateOptions: ["yarnDedupeHighest"],
   prHourlyLimit: 0,
@@ -33,7 +33,6 @@
       matchPackageNames: [
         "eslint",
         "@eslint/*",
-        "@eslint-react/eslint-plugin",
         "@stylistic/eslint-plugin",
         "eslint-config-prettier",
         "eslint-plugin-compat",
@@ -75,16 +74,6 @@
       groupName: "GitHub Actions",
       matchManagers: ["github-actions"],
     },
-    // Forbid codemirror@6.65.7
-    // https://github.com/prettier/prettier/pull/13171#issuecomment-1258427561
-    {
-      matchPackageNames: ["codemirror"],
-      allowedVersions: "!/^6\\.65\\.7$/",
-    },
-    {
-      matchPackageNames: ["react", "react-dom"],
-      allowedVersions: "^18.0.0",
-    },
     {
       groupName: "docusaurus",
       matchPackageNames: ["@docusaurus/*"],
@@ -95,5 +84,8 @@
     "collapse-white-space",
     // It will be updated by release script
     "prettier",
+    // Old versions are required to test
+    "node",
   ],
+  ignorePaths: ["tests/**", "packages/**"],
 }

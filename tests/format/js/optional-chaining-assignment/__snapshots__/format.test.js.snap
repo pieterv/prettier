@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`invalid-destructuring-arr.js [__babel_estree] format 1`] = `
 "Invalid optional chaining in the left-hand side of array destructuring pattern. (1:2)
@@ -135,7 +135,7 @@ Cause: [1:12-1:14]: Expected ')'"
 `;
 
 exports[`invalid-fn-param.js [oxc] format 1`] = `
-"Expected \`,\` but found \`?.\` (1:13)
+"Expected \`,\` or \`)\` but found \`?.\` (1:13)
 > 1 | function f(a?.b) {}
     |             ^^
   2 |"
@@ -229,7 +229,7 @@ Cause: [1:12-1:14]: Expected ')'"
 `;
 
 exports[`invalid-fn-param-assign.js [oxc] format 1`] = `
-"Expected \`,\` but found \`?.\` (1:13)
+"Expected \`,\` or \`)\` but found \`?.\` (1:13)
 > 1 | function f(a?.b = c) {}
     |             ^^
   2 |"

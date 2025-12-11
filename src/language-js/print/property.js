@@ -1,9 +1,9 @@
 import isEs5IdentifierName from "is-es5-identifier-name";
 import { printComments } from "../../main/comments/print.js";
-import printNumber from "../../utils/print-number.js";
-import printString from "../../utils/print-string.js";
-import getRaw from "../utils/get-raw.js";
-import { isNumericLiteral, isStringLiteral } from "../utils/index.js";
+import printNumber from "../../utilities/print-number.js";
+import printString from "../../utilities/print-string.js";
+import getRaw from "../utilities/get-raw.js";
+import { isNumericLiteral, isStringLiteral } from "../utilities/index.js";
 import { printAssignment } from "./assignment.js";
 
 const needsQuoteProps = new WeakMap();
@@ -154,7 +154,7 @@ function printPropertyKey(path, options, print) {
       ),
       options,
     );
-    return path.call((keyPath) => printComments(keyPath, prop, options), "key");
+    return path.call(() => printComments(path, prop, options), "key");
   }
 
   if (
@@ -166,9 +166,9 @@ function printPropertyKey(path, options, print) {
     // '1' -> 1
     // '1.5' -> 1.5
     return path.call(
-      (keyPath) =>
+      () =>
         printComments(
-          keyPath,
+          path,
           /^\d/u.test(key.value) ? printNumber(key.value) : key.value,
           options,
         ),

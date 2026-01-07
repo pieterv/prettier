@@ -9,7 +9,7 @@ import { isMethod } from "../utils/index.js";
 import isFlowKeywordType from "../utils/is-flow-keyword-type.js";
 import { printArray } from "./array.js";
 import { printBinaryCastExpression } from "./cast-expression.js";
-import { printClass } from "./class.js";
+import { printClass, printClassBody } from "./class.js";
 import {
   printComponent,
   printComponentParameter,
@@ -82,7 +82,10 @@ function printFlow(path, options, print) {
     case "HookTypeAnnotation":
       return printHookTypeAnnotation(path, options, print);
     case "DeclareClass":
+    case "RecordDeclaration":
       return printClass(path, options, print);
+    case "RecordDeclarationBody":
+      return printClassBody(path, options, print);
     case "DeclareFunction":
       return [
         printDeclareToken(path),
@@ -211,6 +214,8 @@ function printFlow(path, options, print) {
     case "ClassImplements":
     case "InterfaceExtends":
       return [print("id"), print("typeParameters")];
+    case "RecordDeclarationImplements":
+      return [print("id"), print("typeArguments")];
     case "NullableTypeAnnotation":
       return ["?", print("typeAnnotation")];
     case "Variance": {
@@ -337,6 +342,8 @@ function printFlow(path, options, print) {
     case "MatchLiteralPattern":
     case "MatchUnaryPattern":
     case "MatchIdentifierPattern":
+    case "MatchInstancePattern":
+    case "MatchInstanceObjectPattern":
     case "MatchMemberPattern":
     case "MatchBindingPattern":
     case "MatchObjectPattern":
@@ -344,6 +351,27 @@ function printFlow(path, options, print) {
     case "MatchRestPattern":
     case "MatchArrayPattern":
       return printMatchPattern(path, options, print);
+
+    case "RecordExpression":
+      return [
+        print("recordConstructor"),
+        print("typeArguments"),
+        " ",
+        print("properties"),
+      ];
+    case "RecordExpressionProperties":
+      return printObject(path, options, print);
+    case "RecordDeclarationProperty":
+    case "RecordDeclarationStaticProperty": {
+      const isStatic = node.type === "RecordDeclarationStaticProperty";
+      const valueKey = isStatic ? "value" : "defaultValue";
+      return [
+        isStatic ? "static " : "",
+        printPropertyKey(path, options, print),
+        printTypeAnnotationProperty(path, print),
+        node[valueKey] ? [" = ", print(valueKey)] : "",
+      ];
+    }
   }
 }
 

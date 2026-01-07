@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`async-arrow-invalid.js [flow] format 1`] = `
 "Unexpected token ILLEGAL (4:1)
@@ -6,13 +6,6 @@ exports[`async-arrow-invalid.js [flow] format 1`] = `
   3 | <T> async () => {}
 > 4 |
     | ^"
-`;
-
-exports[`dynamic-import.js [flow] format 1`] = `
-"Unexpected token \`,\`, expected the token \`)\` (1:24)
-> 1 | import('./prettier.mjs', {})
-    |                        ^
-  2 |"
 `;
 
 exports[`function-async.js [flow] format 1`] = `
@@ -29,17 +22,10 @@ exports[`invalid_keyword_symbol.js [flow] format 1`] = `
   2 |"
 `;
 
-exports[`module-attributes-dynamic.js [flow] format 1`] = `
-"Unexpected token \`,\`, expected the token \`)\` (1:18)
-> 1 | import("foo.json", { with: { type: "json" } })
-    |                  ^
-  2 |"
-`;
-
 exports[`module-attributes-static.js [flow] format 1`] = `
-"Unexpected token \`with\`, expected the token \`;\` (1:28)
+"Unexpected token \`type\`, expected the token \`{\` (1:33)
 > 1 | import foo from "foo.json" with type: "json";
-    |                            ^^^^
+    |                                 ^^^^
   2 |"
 `;
 

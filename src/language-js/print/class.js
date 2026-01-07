@@ -54,8 +54,10 @@ const isClassProperty = createTypeCheckFunction([
 */
 function printClass(path, options, print) {
   const { node } = path;
+  const isPrintingRecord = node.type === "RecordDeclaration";
+  const keyword = isPrintingRecord ? "record" : "class";
   /** @type {Doc[]} */
-  const parts = [printDeclareToken(path), printAbstractToken(path), "class"];
+  const parts = [printDeclareToken(path), printAbstractToken(path), keyword];
 
   // Keep old behaviour of extends in same line
   // If there is only on extends and there are not comments
@@ -118,7 +120,10 @@ function printClass(path, options, print) {
   }
 
   const classBody = node.body;
-  if (groupMode && isNonEmptyArray(classBody.body)) {
+  if (
+    groupMode &&
+    isNonEmptyArray(isPrintingRecord ? classBody.elements : classBody.body)
+  ) {
     parts.push(ifBreak(hardline, " ", { groupId: heritageGroupId }));
   } else {
     parts.push(" ");
@@ -282,26 +287,35 @@ function printClassProperty(path, options, print) {
 function printClassBody(path, options, print) {
   const { node } = path;
   const parts = [];
+  const isFlowRecordDeclaration = node.type === "RecordDeclarationBody";
 
-  path.each(({ node, next, isLast }) => {
-    parts.push(print());
+  path.each(
+    ({ node, next, isLast }) => {
+      parts.push(print());
 
-    if (
-      !options.semi &&
-      isClassProperty(node) &&
-      shouldPrintSemicolonAfterClassProperty(node, next)
-    ) {
-      parts.push(";");
-    }
-
-    if (!isLast) {
-      parts.push(hardline);
-
-      if (isNextLineEmpty(node, options)) {
-        parts.push(hardline);
+      if (isFlowRecordDeclaration && node.type !== "MethodDefinition") {
+        parts.push(",");
       }
-    }
-  }, "body");
+
+      if (
+        !isFlowRecordDeclaration &&
+        !options.semi &&
+        isClassProperty(node) &&
+        shouldPrintSemicolonAfterClassProperty(node, next)
+      ) {
+        parts.push(";");
+      }
+
+      if (!isLast) {
+        parts.push(hardline);
+
+        if (isNextLineEmpty(node, options)) {
+          parts.push(hardline);
+        }
+      }
+    },
+    isFlowRecordDeclaration ? "elements" : "body",
+  );
 
   if (hasComment(node, CommentCheckFlags.Dangling)) {
     parts.push(printDanglingComments(path, options));

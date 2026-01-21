@@ -536,6 +536,13 @@ function needsParentheses(path, options) {
             parent.type === "OptionalIndexedAccessType")) ||
         (key === "elementType" && parent.type === "ArrayTypeAnnotation")
       );
+    case "KeyofTypeAnnotation":
+      return (
+        (key === "objectType" &&
+          (parent.type === "IndexedAccessType" ||
+            parent.type === "OptionalIndexedAccessType")) ||
+        (key === "elementType" && parent.type === "ArrayTypeAnnotation")
+      );
     case "ArrayTypeAnnotation":
       return parent.type === "NullableTypeAnnotation";
 

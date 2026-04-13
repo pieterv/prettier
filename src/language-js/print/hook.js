@@ -18,7 +18,7 @@ function printHook(path, options, print) {
   const { node } = path;
 
   /** @type {Array<Doc>} */
-  const parts = [node.async ? "async " : "", "hook"];
+  const parts = ["hook"];
   if (node.id) {
     parts.push(" ", print("id"));
   }

@@ -25,7 +25,7 @@ import { printDeclareToken } from "./misc.js";
 function printComponent(path, options, print) {
   const { node } = path;
 
-  const parts = [printDeclareToken(path), node.async ? "async " : "", "component"];
+  const parts = [printDeclareToken(path), "component"];
   if (node.id) {
     parts.push(" ", print("id"));
   }

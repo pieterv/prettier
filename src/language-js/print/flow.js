@@ -55,6 +55,7 @@ import {
   printUnionType,
 } from "./type-annotation.js";
 import { printTypeParameter, printTypeParameters } from "./type-parameters.js";
+import { printVariableDeclaration } from "./variable-declaration.js";
 
 function printFlow(path, options, print) {
   const { node } = path;
@@ -105,6 +106,11 @@ function printFlow(path, options, print) {
     case "DeclareNamespace":
       return ["declare namespace ", print("id"), " ", print("body")];
     case "DeclareVariable":
+      if (Array.isArray(node.declarations)) {
+        return printVariableDeclaration(path, options, print);
+      }
+
+      // TODO: Remove this part when hermes update AST
       return [
         printDeclareToken(path),
         // TODO: Only use `node.kind` when babel update AST

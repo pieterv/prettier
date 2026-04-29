@@ -3,7 +3,8 @@
 exports[`in-out-variance.js format 1`] = `
 ====================================options=====================================
 parsers: ["flow"]
-                                                      printWidth: 80 (default) |
+printWidth: 80
+                                                                                | printWidth
 =====================================input======================================
 type Contravariant<  in   T  > = T;
 
